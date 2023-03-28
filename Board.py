@@ -1,5 +1,5 @@
-from Tile import Tile
-from Tile import resourceType
+from Tile import *
+from Utils import *
 
 class Board:
     def __init__(self, randomBoard):
@@ -12,7 +12,7 @@ class Board:
         tile7 = Tile(resourceType.BRICK, 10,7)
         tile8 = Tile(resourceType.WHEAT, 9, 8)
         tile9 = Tile(resourceType.WOOD, 11, 9)
-        tile10 = Tile(resourceType.DESERT, 0, 10)
+        tile10 = Tile(resourceType.DESERT, 0, 10, True)
         tile11 = Tile(resourceType.WOOD, 3, 11)
         tile12 = Tile(resourceType.ORE, 8, 12)
         tile13 = Tile(resourceType.WOOD, 8,13)
@@ -43,10 +43,6 @@ class Board:
         for row in self.board:
             for tile in row:
                 if tile.diceNumber == roll:
-                    print('--------')
-                    print(tile.tileNumber)
-                    print(tile.type)
-                    print('^^^^^^^^^')
                     rolledTile.append(tile)
         return rolledTile
 
@@ -70,7 +66,7 @@ class Board:
     def placeRoad(self, tileLoc, location, player):
         placed = False
         tile = self.getTile(tileLoc)
-        adjTiles = self.getAdjTiles(tileLoc, tileLoc)
+        adjTiles = self.getAdjTiles(tileLoc, location)
         placed = tile.placeRoad(location, player, self.trimAdj(location, adjTiles)[1])
         return placed
     
@@ -123,6 +119,56 @@ class Board:
                 else:
                      tileCounter += 1
     
-    def getValidMoves(self, tileNumber, location, player):
-        #todo
-        return
+    def getValidMoves(self, player, moves):
+        def consecutiveRoads(roadList):
+            roadDict = {}
+            possibleLoc = []
+            for tile, loc in roadList:
+                roadDict[tile].append(loc)
+            
+            for key, value in roadDict:
+                if len(value) >= 2:
+                    possibleLoc.append((key, value))
+
+            return possibleLoc
+        
+        def getOpenAdj(tileNum, loc):
+            tile = self.getTile(tileNum)
+            retList = []
+            nextLoc = (loc + 1) % 6
+            if tile.validRoadPlace(nextLoc, player.playerNum, self.trimAdj(nextLoc, self.getAdjTiles(tileNum, nextLoc))[1]):
+                retList.append((tileNum, nextLoc))
+
+            prevLoc = (loc - 1) % 6
+
+            if tile.validRoadPlace(prevLoc, player.playerNum, self.trimAdj(prevLoc, self.getAdjTiles(tileNum, prevLoc))[1]):
+                retList.append((tileNum, prevLoc))
+            
+            return retList
+
+        
+        def roadLocations():
+            locationList = []
+            roads = player.roadLoc
+            settlements = player.settlementLoc
+
+            for tile, loc in roads:
+                locationList.append(getOpenAdj(tile, loc))
+            return locationList
+        
+        for move in moves:
+            if move == actions.ROAD:
+                locationList = roadLocations()
+                if len(locationList) == 0:
+                    moves.remove(actions.ROAD)
+                else:
+                    moves[moves.index(actions.ROAD)] = (actions.ROAD, locationList)
+            elif move == actions.SETTLEMENT:
+                locationList = consecutiveRoads(player.roadLoc)
+                if len(locationList) == 0:
+                    moves.remove(actions.ROAD)
+                else:
+                    moves[moves.index(actions.ROAD)] = (actions.ROAD, locationList)
+    
+
+        return moves

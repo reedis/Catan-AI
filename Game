@@ -1,7 +1,9 @@
 from Board import *
 from Tile import *
 from Player import *
+from Utils import *
 import random
+
 
 class Game:
     def __init__(self, playerCount, randomStart=False):
@@ -13,8 +15,8 @@ class Game:
         for i in range(0, playerCount):
             self.players.append(Player(i))
 
-
     def endTurn(self):
+        self.players[self.currentPlayer].endTurn()
         self.currentPlayer = (self.currentPlayer+1) % self.playerCount
         if self.currentPlayer == 0:
             self.round += 1 
@@ -23,7 +25,7 @@ class Game:
         print("It is player%d's turn now, round %d" % (self.currentPlayer, self.round))
         
     def buildSettlement(self, tileNumber, location):
-        if self.players[self.currentPlayer].buildSettlement():
+        if self.players[self.currentPlayer].buildSettlement(tileNumber, location) or self.inSetUp():
             if self.board.placeSettlement(tileNumber, location, self.currentPlayer, self.inSetUp):
                 print("settlement placed at tile %d, location %d, by player %d" % (tileNumber, location, self.currentPlayer))
             else:
@@ -31,17 +33,15 @@ class Game:
         else:
             print("No settlements left")
         
-
     def buildRoad(self, tileNumber, location):
-        if self.players[self.currentPlayer].buildRoad():
-            if self.board.placeRoad(tileNumber, location, self.currentPlayer):
+        if self.players[self.currentPlayer].buildRoad(tileNumber, location) or self.inSetUp():
+            if self.board.placeRoad(tileNumber, location, self.players[self.currentPlayer]):
                 print("Road placed at tile %d, location %d, by player %d" % (tileNumber, location, self.currentPlayer))
             else:
                 print("issue placing Road please try again")
         else:
             print("No Roads left")
             
-
     def beginGame(self):
         self.board.printBoard()
     
@@ -56,11 +56,11 @@ class Game:
         print("      "+ resList[3])
         print("         "+ resList[4])
 
-    def rollDice(self):
+    def rollDice(self, input=-1):
+        self.players[self.currentPlayer].hasRolled = True
         dice = [1,2,3,4,5,6]       
-        #roll = random.choice(dice) + random.choice(dice)
-        roll = 4
-        print("You Rolled a " + str(roll))
+        roll = (random.choice(dice) + random.choice(dice)) if (input == -1) else input
+        print("You Rolled a " + str(roll)) 
         if roll == 7:
             self.seven()
         else:
@@ -68,8 +68,7 @@ class Game:
 
     def updateRes(self, roll):
             tiles = self.board.rolledTiles(roll)
-            print(len(tiles))
-           
+
             for tile in tiles:
                 playerDict = {}
                 for player in self.players:
@@ -77,13 +76,10 @@ class Game:
                 
                 res = tile.type
                 payment = tile.getPayment(playerDict)
-                print(payment)
                 vals = {x:y for x,y in payment.items() if y!=0}
                 if not len(vals) == 0:
                     listPay = list(vals.keys())
-                    print(listPay)
                     for playerIndex in listPay:
-                        print(playerIndex)
                         player = self.players[playerIndex]
                         player.updateResources(res, payment[playerIndex])
 
@@ -93,31 +89,33 @@ class Game:
             player.printPlayerResources()
 
     def seven(self):
-        print("TODO")
+        print("")
 
+    def getActions(self):
+        actionList = self.players[self.currentPlayer].getMoves()
+        print(actionList)
+        actionList = self.board.getValidMoves(self.players[self.currentPlayer], actionList)
+        print(actionList)
+        
 
 
         
 
-catan = Game(3)
-catan.buildSettlement(1, 3)
-catan.buildSettlement(2, 3)
-catan.buildSettlement(4, 3)
-catan.buildSettlement(5, 3)
-catan.buildSettlement(6, 3)
-catan.endTurn()
-catan.buildSettlement(8, 3)
-catan.buildSettlement(9, 3)
-catan.buildSettlement(10, 3)
-catan.buildSettlement(11, 3)
+catan = Game(2)
+
+catan.resourceMap()
 catan.buildSettlement(13, 3)
+catan.buildRoad(13, 3)
+catan.rollDice(8)
+catan.rollDice(5)
 catan.endTurn()
-catan.buildSettlement(14, 3)
-catan.buildSettlement(15, 3)
-catan.buildSettlement(17, 3)
-catan.buildSettlement(18, 3)
-#catan.beginGame()
-#catan.resourceMap()
-catan.rollDice()
-catan.printPlayerStats()
+catan.buildSettlement(13, 1)
+catan.buildRoad(13, 2)
+catan.endTurn()
+catan.endTurn()
+catan.endTurn()
+catan.beginGame()
+catan.rollDice(7)
+catan.getActions()
+catan.resourceMap()
 
