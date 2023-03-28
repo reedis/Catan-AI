@@ -1,0 +1,62 @@
+from Board import *
+from Tile import *
+from Player import *
+
+class Game:
+    def __init__(self, playerCount, randomStart=False):
+        self.playerCount = playerCount
+        self.currentPlayer = 0
+        self.board = Board(randomStart)
+        self.round = 1
+        self.players = []
+        for i in range(0, playerCount):
+            self.players.append(Player(i))
+
+
+    def endTurn(self):
+        self.currentPlayer = (self.currentPlayer+1) % self.playerCount
+        if self.currentPlayer == 0:
+            self.round += 1 
+            if self.round == 3:
+                print("SET UP COMPLETE")
+        print("It is player%d's turn now, round %d" % (self.currentPlayer, self.round))
+        
+    def buildSettlement(self, tileNumber, location):
+        if self.players[self.currentPlayer].buildSettlement():
+            if self.board.placeSettlement(tileNumber, location, self.currentPlayer, self.inSetUp):
+                print("settlement placed at tile %d, location %d, by player %d" % (tileNumber, location, self.currentPlayer))
+            else:
+                print("issue placing settlement please try again")
+        else:
+            print("No settlements left")
+        
+
+    def buildRoad(self, tileNumber, location):
+        if self.players[self.currentPlayer].buildRoad():
+            if self.board.placeRoad(tileNumber, location, self.currentPlayer):
+                print("Road placed at tile %d, location %d, by player %d" % (tileNumber, location, self.currentPlayer))
+            else:
+                print("issue placing Road please try again")
+        else:
+            print("No Roads left")
+            
+
+    def beginGame(self):
+        self.board.printBoard()
+    
+    def inSetUp(self):
+        return self.round <= 2
+    
+    def resourceMap(self):
+        resList = self.board.resourceMap()
+        print("          " + resList[0])
+        print("    "+ resList[1])
+        print(""+ resList[2])
+        print("      "+ resList[3])
+        print("         "+ resList[4])
+        
+
+catan = Game(2)
+#catan.resourceMap()
+catan.buildSettlement(5, 1)
+catan.buildSettlement(5, 2)
