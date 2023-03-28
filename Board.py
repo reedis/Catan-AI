@@ -1,29 +1,110 @@
 from Tile import *
 from Utils import *
+import random
 
 class Board:
-    def __init__(self, randomBoard):
-        tile1 = Tile(resourceType.ORE, 10, 1)
-        tile2 = Tile(resourceType.SHEEP, 2, 2)
-        tile3 = Tile(resourceType.WOOD, 9, 3)
-        tile4 = Tile(resourceType.WHEAT, 12, 4)
-        tile5 = Tile(resourceType.BRICK, 6, 5)
-        tile6 = Tile(resourceType.SHEEP, 4, 6)
-        tile7 = Tile(resourceType.BRICK, 10,7)
-        tile8 = Tile(resourceType.WHEAT, 9, 8)
-        tile9 = Tile(resourceType.WOOD, 11, 9)
-        tile10 = Tile(resourceType.DESERT, 0, 10, True)
-        tile11 = Tile(resourceType.WOOD, 3, 11)
-        tile12 = Tile(resourceType.ORE, 8, 12)
-        tile13 = Tile(resourceType.WOOD, 8,13)
-        tile14 = Tile(resourceType.ORE, 3, 14)
-        tile15 = Tile(resourceType.WHEAT, 4, 15)
-        tile16 = Tile(resourceType.SHEEP, 5, 16)
-        tile17 = Tile(resourceType.BRICK, 5, 17)
-        tile18 = Tile(resourceType.WHEAT, 6, 18)
-        tile19 = Tile(resourceType.SHEEP, 11, 19)
-        self.board = [[tile1, tile2, tile3], [tile4, tile5, tile6, tile7], [tile8, tile9, tile10, tile11, tile12], [tile13, tile14, tile15, tile16], [tile17, tile18, tile19]]
+    def __init__(self, randomBoard=False):
+        self.board = [[None, None, None],
+                      [None,None,None,None],
+                      [None,None,None,None,None],
+                      [None,None,None,None],
+                      [None,None,None]]
+        if randomBoard:
+            self.randomBoard()
+        else:
+            tile1 = Tile(resourceType.ORE, 10, 1)
+            tile2 = Tile(resourceType.SHEEP, 2, 2)
+            tile3 = Tile(resourceType.WOOD, 9, 3)
+            tile4 = Tile(resourceType.WHEAT, 12, 4)
+            tile5 = Tile(resourceType.BRICK, 6, 5)
+            tile6 = Tile(resourceType.SHEEP, 4, 6)
+            tile7 = Tile(resourceType.BRICK, 10,7)
+            tile8 = Tile(resourceType.WHEAT, 9, 8)
+            tile9 = Tile(resourceType.WOOD, 11, 9)
+            tile10 = Tile(resourceType.DESERT, 0, 10, True)
+            tile11 = Tile(resourceType.WOOD, 3, 11)
+            tile12 = Tile(resourceType.ORE, 8, 12)
+            tile13 = Tile(resourceType.WOOD, 8,13)
+            tile14 = Tile(resourceType.ORE, 3, 14)
+            tile15 = Tile(resourceType.WHEAT, 4, 15)
+            tile16 = Tile(resourceType.SHEEP, 5, 16)
+            tile17 = Tile(resourceType.BRICK, 5, 17)
+            tile18 = Tile(resourceType.WHEAT, 6, 18)
+            tile19 = Tile(resourceType.SHEEP, 11, 19)
+            self.board = [[tile1, tile2, tile3], [tile4, tile5, tile6, tile7], [tile8, tile9, tile10, tile11, tile12], [tile13, tile14, tile15, tile16], [tile17, tile18, tile19]]
         self.setUp = True
+    
+    def randomBoard(self):
+        def randomRes(counts, res):
+            for key, value in counts.items():
+                if key == resourceType.DESERT:
+                    if value > 0:
+                        res.remove(key)
+                        counts[key] = 0
+                if key == resourceType.ORE or key == resourceType.BRICK:
+                    if value >= 3:
+                        res.remove(key)
+                        counts[key] = 0
+                elif value >=4:
+                    res.remove(key)
+                    counts[key] = 0
+            
+            retRes = random.choice(res)
+            counts[retRes] += 1
+            return retRes
+        
+        def randomNum(dice):
+            randNum = random.choice(dice)
+            dice.remove(randNum)
+            return randNum
+
+        countDict = {resourceType.BRICK: 0, resourceType.DESERT: 0, resourceType.ORE: 0, resourceType.SHEEP: 0, resourceType.WHEAT: 0, resourceType.WOOD: 0}
+
+        diceProbs = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12]
+        res = [resourceType.BRICK, resourceType.WHEAT, resourceType.SHEEP, resourceType.WOOD, resourceType.ORE, resourceType.DESERT]
+        tileCounter = 1
+        for i in range(0,5):
+            print('------')
+            print('i: %d' % i)
+            if i == 0 or i == 4:
+                for j in range(0, 3):
+                    print("j: %d" % j)
+                    randRes = randomRes(countDict, res)
+                    randDice = 0
+                    robber = True
+                    if not randRes == resourceType.DESERT:
+                        randDice = randomNum(diceProbs)
+                        robber = False
+                    self.board[i][j] = Tile(randRes, randDice, tileCounter, robber)
+                    tileCounter += 1
+                continue
+            if i == 1 or i == 3:
+                for j in range(0,4):
+                    print("j: %d" % j)
+                    randRes = randomRes(countDict, res)
+                    randDice = 0
+                    robber = True
+                    if not randRes == resourceType.DESERT:
+                        randDice = randomNum(diceProbs)
+                        robber = False
+                    self.board[i][j] = Tile(randRes, randDice, tileCounter, robber)
+                    tileCounter += 1
+                continue
+            else:
+                for j in range(0,5):
+                    print("j: %d" % j)
+                    randRes = randomRes(countDict, res)
+                    randDice = 0
+                    robber = True
+                    if not randRes == resourceType.DESERT:
+                        randDice = randomNum(diceProbs)
+                        robber = False
+                    self.board[i][j] = Tile(randRes, randDice, tileCounter, robber)
+                    tileCounter += 1
+                continue
+
+                    
+
         
     def printBoard(self, count=19):
         counter = 0

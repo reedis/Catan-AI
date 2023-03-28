@@ -101,8 +101,11 @@ class Game:
 
         
 
-catan = Game(2)
+catan = Game(2, True)
 
+catan.resourceMap()
+catan.beginGame()
+'''
 catan.resourceMap()
 catan.buildSettlement(13, 3)
 catan.buildRoad(13, 3)
@@ -118,4 +121,4 @@ catan.beginGame()
 catan.rollDice(7)
 catan.getActions()
 catan.resourceMap()
-
+'''
