@@ -74,7 +74,6 @@ class Tile:
             name = (", " + str(self.road6[1])) if (not (self.road6[1] == None)) else ''
             return (self.road6[0] +name)
 
-
     def placeSettlement(self, location, player, adjList, init=False):
         def validPlace():
             if location == 1:
@@ -198,7 +197,6 @@ class Tile:
         elif location == 6:
             self.spot6 = ("SETTLEMENT", player)
         
-
     def updateRoad(self, location, player):
         if location == 1:
             self.road1 = ("ROAD", player)
@@ -213,6 +211,9 @@ class Tile:
         elif location == 6:
             self.road6 = ("ROAD", player)
 
+    def getSpotsAsList(self):
+        return [self.spot1, self.spot2, self.spot3, self.spot4, self.spot5, self.spot6]
+    
     def placeRoad(self, location, player, adj):
         def validPlace():
             if location == 1:
@@ -268,5 +269,22 @@ class Tile:
             return True
         else:
             return False
+        
+    def getPayment(self, playerDict):
+        if not self.spot1[1] == None:
+            playerDict[self.spot1[1]] += 1
+        if not self.spot2[1] == None:
+            playerDict[self.spot2[1]] += 1
+        if not self.spot3[1] == None:
+            playerDict[self.spot3[1]] += 1
+        if not self.spot4[1] == None:
+            playerDict[self.spot4[1]] += 1
+        if not self.spot5[1] == None:
+            playerDict[self.spot5[1]] += 1
+        if not self.spot6[1] == None:
+            playerDict[self.spot6[1]] += 1
+        return playerDict
+        
+        
             
 

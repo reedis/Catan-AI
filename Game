@@ -1,6 +1,7 @@
 from Board import *
 from Tile import *
 from Player import *
+import random
 
 class Game:
     def __init__(self, playerCount, randomStart=False):
@@ -54,9 +55,69 @@ class Game:
         print(""+ resList[2])
         print("      "+ resList[3])
         print("         "+ resList[4])
+
+    def rollDice(self):
+        dice = [1,2,3,4,5,6]       
+        #roll = random.choice(dice) + random.choice(dice)
+        roll = 4
+        print("You Rolled a " + str(roll))
+        if roll == 7:
+            self.seven()
+        else:
+            self.updateRes(roll)
+
+    def updateRes(self, roll):
+            tiles = self.board.rolledTiles(roll)
+            print(len(tiles))
+           
+            for tile in tiles:
+                playerDict = {}
+                for player in self.players:
+                    playerDict[player.playerNum] = 0
+                
+                res = tile.type
+                payment = tile.getPayment(playerDict)
+                print(payment)
+                vals = {x:y for x,y in payment.items() if y!=0}
+                if not len(vals) == 0:
+                    listPay = list(vals.keys())
+                    print(listPay)
+                    for playerIndex in listPay:
+                        print(playerIndex)
+                        player = self.players[playerIndex]
+                        player.updateResources(res, payment[playerIndex])
+
+    def printPlayerStats(self):
+        for player in self.players:
+            player.printPlayerStats()
+            player.printPlayerResources()
+
+    def seven(self):
+        print("TODO")
+
+
+
         
 
-catan = Game(2)
+catan = Game(3)
+catan.buildSettlement(1, 3)
+catan.buildSettlement(2, 3)
+catan.buildSettlement(4, 3)
+catan.buildSettlement(5, 3)
+catan.buildSettlement(6, 3)
+catan.endTurn()
+catan.buildSettlement(8, 3)
+catan.buildSettlement(9, 3)
+catan.buildSettlement(10, 3)
+catan.buildSettlement(11, 3)
+catan.buildSettlement(13, 3)
+catan.endTurn()
+catan.buildSettlement(14, 3)
+catan.buildSettlement(15, 3)
+catan.buildSettlement(17, 3)
+catan.buildSettlement(18, 3)
+#catan.beginGame()
 #catan.resourceMap()
-catan.buildSettlement(5, 1)
-catan.buildSettlement(5, 2)
+catan.rollDice()
+catan.printPlayerStats()
+

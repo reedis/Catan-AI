@@ -16,12 +16,12 @@ class Board:
         tile11 = Tile(resourceType.WOOD, 3, 11)
         tile12 = Tile(resourceType.ORE, 8, 12)
         tile13 = Tile(resourceType.WOOD, 8,13)
-        tile14 = Tile(resourceType.ORE, 3,14)
+        tile14 = Tile(resourceType.ORE, 3, 14)
         tile15 = Tile(resourceType.WHEAT, 4, 15)
         tile16 = Tile(resourceType.SHEEP, 5, 16)
         tile17 = Tile(resourceType.BRICK, 5, 17)
         tile18 = Tile(resourceType.WHEAT, 6, 18)
-        tile19 = Tile(resourceType.SHEEP, 10, 19)
+        tile19 = Tile(resourceType.SHEEP, 11, 19)
         self.board = [[tile1, tile2, tile3], [tile4, tile5, tile6, tile7], [tile8, tile9, tile10, tile11, tile12], [tile13, tile14, tile15, tile16], [tile17, tile18, tile19]]
         self.setUp = True
         
@@ -37,6 +37,18 @@ class Board:
                     break
             if breakFlag:
                 break
+
+    def rolledTiles(self, roll):
+        rolledTile = []
+        for row in self.board:
+            for tile in row:
+                if tile.diceNumber == roll:
+                    print('--------')
+                    print(tile.tileNumber)
+                    print(tile.type)
+                    print('^^^^^^^^^')
+                    rolledTile.append(tile)
+        return rolledTile
 
     def resourceMap(self):
         tileList = []
