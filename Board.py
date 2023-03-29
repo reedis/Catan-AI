@@ -64,11 +64,8 @@ class Board:
         res = [resourceType.BRICK, resourceType.WHEAT, resourceType.SHEEP, resourceType.WOOD, resourceType.ORE, resourceType.DESERT]
         tileCounter = 1
         for i in range(0,5):
-            print('------')
-            print('i: %d' % i)
             if i == 0 or i == 4:
                 for j in range(0, 3):
-                    print("j: %d" % j)
                     randRes = randomRes(countDict, res)
                     randDice = 0
                     robber = True
@@ -80,7 +77,6 @@ class Board:
                 continue
             if i == 1 or i == 3:
                 for j in range(0,4):
-                    print("j: %d" % j)
                     randRes = randomRes(countDict, res)
                     randDice = 0
                     robber = True
@@ -92,7 +88,6 @@ class Board:
                 continue
             else:
                 for j in range(0,5):
-                    print("j: %d" % j)
                     randRes = randomRes(countDict, res)
                     randDice = 0
                     robber = True
