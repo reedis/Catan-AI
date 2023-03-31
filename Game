@@ -96,45 +96,68 @@ class Game:
         print(actionList)
         actionList = self.board.getValidMoves(self.players[self.currentPlayer], actionList)
         print(actionList)
-    
+     
     def gameOver(self):
         for player in self.players:
             if player.vp >= 10:
                 print("Player%d has won!" % player.playerNum)
                 return False
         return True
+    
+    def trade(self):
+        self.players[self.currentPlayer].trade()
+
 
         
-
+'''
 gameCheck = True
 while(gameCheck):
-    playerCount = int(input("How many players?"))
-    rand = input("Do you want a random board? Y/N").lower().strip()
+    playerCount = int(input("How many players? "))
+    rand = input("Do you want a random board? Y/N ").lower().strip()
     rand = (rand == 'y')
     catan = Game(playerCount, rand)
     catan.resourceMap()
     gameCheck = False
-    
-    
-
-
-
 '''
+    
+    
+catan = Game(1)
 catan.resourceMap()
-catan.beginGame()1
+catan.beginGame()
 catan.resourceMap()
 catan.buildSettlement(13, 3)
 catan.buildRoad(13, 3)
 catan.rollDice(8)
 catan.rollDice(5)
+catan.rollDice(8)
+catan.rollDice(5)
+catan.rollDice(8)
+catan.rollDice(5)
+catan.rollDice(8)
+catan.rollDice(5)
+catan.rollDice(8)
+catan.rollDice(5)
+catan.rollDice(8)
+catan.rollDice(5)
+catan.rollDice(8)
+catan.rollDice(5)
+catan.rollDice(8)
+catan.rollDice(5)
+catan.rollDice(8)
+catan.rollDice(5)
+catan.rollDice(8)
+catan.rollDice(5)
+catan.rollDice(8)
+catan.rollDice(5)
+catan.rollDice(8)
+catan.rollDice(5)
 catan.endTurn()
-catan.buildSettlement(13, 1)
-catan.buildRoad(13, 2)
 catan.endTurn()
 catan.endTurn()
 catan.endTurn()
 catan.beginGame()
 catan.rollDice(7)
 catan.getActions()
-catan.resourceMap()
-'''
+catan.printPlayerStats()
+catan.trade()
+catan.printPlayerStats()

@@ -71,6 +71,8 @@ class Player:
             ##checks for resources for dev card
             if sheep and ore and wheat:
                 moves.append(actions.BUYDEVCARD)
+            if self.canTrade():
+                moves.append(actions.TRADE)
         else:
             moves.append(actions.ROLL)
 
@@ -82,6 +84,73 @@ class Player:
         print(str(type))
         self.resources[type] += count
         self.totalCards += count
+
+    def trade(self):
+        tradeableRes = self.getTradeableRes()
+        resourcePossible = ["WOOD", "WHEAT", "ORE", "SHEEP", "BRICK"]
+        resAsString = []
+        print("You can trade (resource, count):")
+        for item in tradeableRes:
+            print("(%s, %d)" % (item.value, self.resources[item]))
+            resAsString.append(item.value)
+        res = "Temp"
+        while (not res in resAsString):
+            res = input("Please type in the resource you want to trade from the list above: ").upper().strip()
+            if (not res in resAsString):
+                print("Please type in a resources from the list provided")
+
+        actualRes = self.getResFromString(res)
+        count = 3
+        while(not (count % 4 == 0)):
+            count = int(input("Please input the resources you are trading (divisible by 4) "))
+            if (not count % 4 == 0):
+                print("please input a count divisible by 4")
+            elif(count > self.resources[actualRes]):
+                print("Please input a number inside the amount you have")
+                count = 1
+        newRes = "sd"
+        while (not newRes in resourcePossible):
+            newRes = input("What resources would you like: ").upper().strip()
+            if(not newRes in resourcePossible):
+                print("Please input a valid resource from below:")
+                for resP in resourcePossible:
+                    print(resP)
+        newRes = self.getResFromString(newRes)
+        newCount = count/4
+        confirm = input("you want to trade %d %s for %d %s? Y/N " % (count, res, newCount, newRes.value)).lower().strip()
+        if confirm == 'y':
+            self.tradeRes(count, actualRes, newCount, newRes)
+        else:
+            print("Sorry, lets try again")
+            self.trade()
+
+    def tradeRes(self, oldVal, oldRes, newVal, newRes):
+        self.resources[oldRes] -= oldVal
+        self.resources[newRes] += newVal
+
+    def getResFromString(self, resource):
+        if resource == "BRICK":
+            return resourceType.BRICK
+        if resource == "ORE":
+            return resourceType.ORE
+        if resource == "SHEEP":
+            return resourceType.SHEEP
+        if resource == "WOOD":
+            return resourceType.WOOD
+        if resource == "WHEAT":
+            return resourceType.WHEAT
+        else:
+            return None
+
+    def getTradeableRes(self):
+        resList = []
+        for key,value in self.resources.items():
+            if value >= 4:
+                resList.append(key)
+        return resList
+    
+    def canTrade(self):
+        return not len(self.getTradeableRes()) == 0
 
     def removeWheat(self):
         self.resources[resourceType.WHEAT] -= 1 if (self.resources[resourceType.WHEAT] >=1) else 0

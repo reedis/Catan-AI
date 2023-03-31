@@ -99,8 +99,6 @@ class Board:
                 continue
 
                     
-
-        
     def printBoard(self, count=19):
         counter = 0
         breakFlag = False
