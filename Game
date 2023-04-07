@@ -13,7 +13,7 @@ class Game:
         self.round = 1
         self.players = []
         for i in range(0, playerCount):
-            self.players.append(Player(i))
+            self.players.append(HumanPlayer(i))
 
     def endTurn(self):
         self.players[self.currentPlayer].endTurn()
@@ -67,21 +67,21 @@ class Game:
             self.updateRes(roll)
 
     def updateRes(self, roll):
-            tiles = self.board.rolledTiles(roll)
+        tiles = self.board.rolledTiles(roll)
 
-            for tile in tiles:
-                playerDict = {}
-                for player in self.players:
-                    playerDict[player.playerNum] = 0
-                
-                res = tile.type
-                payment = tile.getPayment(playerDict)
-                vals = {x:y for x,y in payment.items() if y!=0}
-                if not len(vals) == 0:
-                    listPay = list(vals.keys())
-                    for playerIndex in listPay:
-                        player = self.players[playerIndex]
-                        player.updateResources(res, payment[playerIndex])
+        for tile in tiles:
+            playerDict = {}
+            for player in self.players:
+                playerDict[player.playerNum] = 0
+            
+            res = tile.type
+            payment = tile.getPayment(playerDict)
+            vals = {x:y for x,y in payment.items() if y!=0}
+            if not len(vals) == 0:
+                listPay = list(vals.keys())
+                for playerIndex in listPay:
+                    player = self.players[playerIndex]
+                    player.updateResources(res, payment[playerIndex])
 
     def printPlayerStats(self):
         for player in self.players:
@@ -107,6 +107,9 @@ class Game:
     def trade(self):
         self.players[self.currentPlayer].trade()
 
+    # TODO: trading with other players?
+    # could result in a loop if the agent really wants to make a trade
+    # maybe limit how many times a player can ask for a trade? 
 
         
 '''

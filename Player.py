@@ -1,7 +1,8 @@
 from Tile import resourceType
 from Utils import *
+from abc import ABC, abstractmethod
 
-class Player:
+class Player(ABC):
     def __init__(self, playerNum):
         self.resources = {resourceType.BRICK: 0, resourceType.ORE: 0, resourceType.SHEEP: 0, resourceType.WHEAT: 0, resourceType.WOOD: 0}
         self.settlementLoc = []
@@ -85,44 +86,17 @@ class Player:
         self.resources[type] += count
         self.totalCards += count
 
+    @abstractmethod
     def trade(self):
-        tradeableRes = self.getTradeableRes()
-        resourcePossible = ["WOOD", "WHEAT", "ORE", "SHEEP", "BRICK"]
-        resAsString = []
-        print("You can trade (resource, count):")
-        for item in tradeableRes:
-            print("(%s, %d)" % (item.value, self.resources[item]))
-            resAsString.append(item.value)
-        res = "Temp"
-        while (not res in resAsString):
-            res = input("Please type in the resource you want to trade from the list above: ").upper().strip()
-            if (not res in resAsString):
-                print("Please type in a resources from the list provided")
+        ...
 
-        actualRes = self.getResFromString(res)
-        count = 3
-        while(not (count % 4 == 0)):
-            count = int(input("Please input the resources you are trading (divisible by 4) "))
-            if (not count % 4 == 0):
-                print("please input a count divisible by 4")
-            elif(count > self.resources[actualRes]):
-                print("Please input a number inside the amount you have")
-                count = 1
-        newRes = "sd"
-        while (not newRes in resourcePossible):
-            newRes = input("What resources would you like: ").upper().strip()
-            if(not newRes in resourcePossible):
-                print("Please input a valid resource from below:")
-                for resP in resourcePossible:
-                    print(resP)
-        newRes = self.getResFromString(newRes)
-        newCount = count/4
-        confirm = input("you want to trade %d %s for %d %s? Y/N " % (count, res, newCount, newRes.value)).lower().strip()
-        if confirm == 'y':
-            self.tradeRes(count, actualRes, newCount, newRes)
-        else:
-            print("Sorry, lets try again")
-            self.trade()
+    @abstractmethod
+    def playTurn(self):
+        ...
+
+    @abstractmethod
+    def playSetupTurn(self):
+        ...
 
     def tradeRes(self, oldVal, oldRes, newVal, newRes):
         self.resources[oldRes] -= oldVal
@@ -172,3 +146,74 @@ class Player:
 
     def printPlayerResources(self):
         print("wood: %d, wheat: %d, brick: %d, ore: %d, sheep: %d," % (self.resources[resourceType.WOOD], self.resources[resourceType.WHEAT], self.resources[resourceType.BRICK], self.resources[resourceType.ORE], self.resources[resourceType.SHEEP]))
+
+
+
+class HumanPlayer(Player):
+    def __init__(self, playerNum):
+        super().__init__(playerNum)
+    
+    def trade(self):
+        tradeableRes = self.getTradeableRes()
+        resourcePossible = ["WOOD", "WHEAT", "ORE", "SHEEP", "BRICK"]
+        resAsString = []
+        print("You can trade (resource, count):")
+        for item in tradeableRes:
+            print("(%s, %d)" % (item.value, self.resources[item]))
+            resAsString.append(item.value)
+        res = "Temp"
+        while (not res in resAsString):
+            res = input("Please type in the resource you want to trade from the list above: ").upper().strip()
+            if (not res in resAsString):
+                print("Please type in a resources from the list provided")
+
+        actualRes = self.getResFromString(res)
+        count = 3
+        while(not (count % 4 == 0)):
+            count = int(input("Please input the resources you are trading (divisible by 4) "))
+            if (not count % 4 == 0):
+                print("please input a count divisible by 4")
+            elif(count > self.resources[actualRes]):
+                print("Please input a number inside the amount you have")
+                count = 1
+        newRes = "sd"
+        while (not newRes in resourcePossible):
+            newRes = input("What resources would you like: ").upper().strip()
+            if(not newRes in resourcePossible):
+                print("Please input a valid resource from below:")
+                for resP in resourcePossible:
+                    print(resP)
+        newRes = self.getResFromString(newRes)
+        newCount = count/4
+        confirm = input("you want to trade %d %s for %d %s? Y/N " % (count, res, newCount, newRes.value)).lower().strip()
+        if confirm == 'y':
+            self.tradeRes(count, actualRes, newCount, newRes)
+        else:
+            print("Sorry, lets try again")
+            self.trade()
+    
+    def playTurn(self):
+        # go through a full turn, including rolling, building, and trading
+        ...
+    
+    def playSetupTurn(self):
+        # go through a setup turn, including building settlements and roads
+        ...
+
+
+class AutoPlayer(Player):
+    def __init__(self, playerNum):
+        super().__init__(playerNum)
+    
+    def trade(self):
+        ...
+    
+    def playTurn(self):
+        # roll dice
+        # does agent want to build? what does it want to build and where?
+        # does agent want to trade? what does it want to trade?
+        ...
+    
+    def playSetupTurn(self):
+        # where does the agent want to build?
+        ...
