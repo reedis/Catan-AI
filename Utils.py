@@ -15,3 +15,12 @@ class resourceType(Enum):
     BRICK = "BRICK"
     WOOD = "WOOD"
     DESERT = "DESERT"
+
+class devCards(Enum):
+    KNIGHT = "KNIGHT"
+    YEAROFPLENTY = "YEAROFPLENTY" 
+    MONOPOLY = "MONOPOLY" 
+    VP = "VP" 
+    ROADBUILDER = "ROADBUILDER"
+
+

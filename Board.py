@@ -97,8 +97,7 @@ class Board:
                     self.board[i][j] = Tile(randRes, randDice, tileCounter, robber)
                     tileCounter += 1
                 continue
-
-                    
+   
     def printBoard(self, count=19):
         counter = 0
         breakFlag = False

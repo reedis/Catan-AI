@@ -12,7 +12,8 @@ class Player(ABC):
         self.settlements = 5
         self.cities = 4
         self.roads = 15
-        self.devCards = []
+        self.devCardCount = 0
+        self.devCards = {}
         self.playerNum = playerNum
         self.hasRolled = False
         self.devCardsUsed = 0
@@ -123,8 +124,25 @@ class Player(ABC):
                 resList.append(key)
         return resList
     
+    def displayDevCards(self):
+        ...
+
+    def useDevCards(self):
+        ...
+    
     def canTrade(self):
         return not len(self.getTradeableRes()) == 0
+    
+    def canDevCard(self):
+        return not self.devCardCount == 0
+    
+    def addDevCard(self, res):
+        if res in self.devCards:
+            self.devCards[res] += 1
+        else:
+            self.devCards[res] = 1
+        print("You have recieved one %s card" % res.value)
+        return
 
     def removeWheat(self):
         self.resources[resourceType.WHEAT] -= 1 if (self.resources[resourceType.WHEAT] >=1) else 0
@@ -194,7 +212,26 @@ class HumanPlayer(Player):
     
     def playTurn(self):
         # go through a full turn, including rolling, building, and trading
-        ...
+        # checks to see if they want to use a dev card pre-roll
+        if self.canDevCard():
+            self.displayDevCards()
+            devCard = input("Would you like to use one of the above dev cards? Y/N ").lower().strip()
+            if devCard == 'y':
+                self.useDevCards()
+            elif not devCard == 'n':
+                print("Invalid option, please try again")
+                self.playTurn()
+        #roll
+
+        playableActions = self.getMoves()
+
+        #build/trade
+        if not len(playableActions)==0:
+            ...
+        else:
+            input("You have no more actions you can take this round,\n press any key to end your turn")
+        #end
+        return 
     
     def playSetupTurn(self):
         # go through a setup turn, including building settlements and roads
@@ -209,6 +246,7 @@ class AutoPlayer(Player):
         ...
     
     def playTurn(self):
+        # check for pre-turn dev card
         # roll dice
         # does agent want to build? what does it want to build and where?
         # does agent want to trade? what does it want to trade?

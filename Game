@@ -12,6 +12,7 @@ class Game:
         self.board = Board(randomStart)
         self.round = 1
         self.players = []
+        self.devCards = {devCards.KNIGHT: 14, devCards.MONOPOLY: 2, devCards.ROADBUILDER: 2, devCards.YEAROFPLENTY: 2, devCards.VP: 5}
         for i in range(0, playerCount):
             self.players.append(HumanPlayer(i))
 
@@ -41,6 +42,27 @@ class Game:
                 print("issue placing Road please try again")
         else:
             print("No Roads left")
+
+    def buyDevCard(self):
+        count = 0
+        res = None
+        for key, value in self.devCards.items():
+            count += value
+        
+        if not count == 0:
+            randomDev = random.choice(range(0,count))
+
+            for key, value in self.devCards.items():
+                count -= value
+                if count <= 0:
+                    res = key
+                    self.devCards[key] -= 1
+                    break
+            
+            self.players[self.playerCount].addDevCard(res)
+            input("Please press any key to continue")
+        else:
+            input("Sorry all dev cards have been bought, \nplease press any key to continue")
             
     def beginGame(self):
         self.board.printBoard()
@@ -103,6 +125,13 @@ class Game:
                 print("Player%d has won!" % player.playerNum)
                 return False
         return True
+    
+    def playTurn(self):
+        if self.inSetUp():
+            self.players[self.playerCount].playSetupTurn()
+        else:
+            self.players[self.playerCount].playTurn()
+
     
     def trade(self):
         self.players[self.currentPlayer].trade()
