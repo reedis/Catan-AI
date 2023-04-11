@@ -115,9 +115,8 @@ class Game:
 
     def getActions(self):
         actionList = self.players[self.currentPlayer].getMoves()
-        print(actionList)
         actionList = self.board.getValidMoves(self.players[self.currentPlayer], actionList)
-        print(actionList)
+        return actionList
      
     def gameOver(self):
         for player in self.players:
@@ -132,7 +131,18 @@ class Game:
         else:
             self.players[self.playerCount].playTurn()
 
-    
+    def printExampleTile(self):
+        one = ('-------------spot 1---------------')
+        two = ('--------road6--------road1--------')
+        three = ('--spot6--------------------spot2--')
+        four = ('--road5--------------------road2--')
+        five = ('--spot5--------------------spot3--')
+        six = ('--------road4--------road3--------')
+        seven = ('--------------spot4---------------')
+        pList = [one,two,three, four, five, six, seven]
+        for p in pList:
+            print(p)
+
     def trade(self):
         self.players[self.currentPlayer].trade()
 
@@ -141,18 +151,62 @@ class Game:
     # maybe limit how many times a player can ask for a trade? 
 
         
-'''
-gameCheck = True
-while(gameCheck):
+
+gameCheck = False
+while(not gameCheck):
     playerCount = int(input("How many players? "))
     rand = input("Do you want a random board? Y/N ").lower().strip()
     rand = (rand == 'y')
     catan = Game(playerCount, rand)
     catan.resourceMap()
-    gameCheck = False
+    catan.beginGame()
+    while(catan.inSetUp()):
+        option = input("Will player %d please place their first settlement type M to see the resource map again, \ntype A to see the array again, or press anything else to build " % catan.currentPlayer).lower().strip()
+        if option == 'm':
+            catan.resourceMap()
+            yn = input("Would you like to see the array? Y/N ").lower().strip()
+            if yn == 'y':
+                catan.beginGame()
+        elif option == 'a':
+            catan.beginGame()
+            yn = input("Would you like to see the resource map? Y/N ").lower().strip()
+            if yn == 'y':
+                catan.resourceMap()
+
+        tileNum = 200000
+        while(not tileNum <= 19 and tileNum >=1):
+            tileNum = int(input("Please input the tile nuber you want to build on: ").lower().strip())
+            if(tileNum <= 19 and tileNum >=1):
+                tile = catan.board.getTile(tileNum)
+                yn = input("You want to build on tile %d, the %s with the dice number of %d on it? Y/N " % (tileNum, tile.type.value, tile.diceNumber)).lower().strip()
+                if yn == 'n':
+                    tileNum = 2000000
+                    input("Press any key to try again")
+            else:
+                input("Invalid number (Valid range: 1-19), press any key to try again")
+        
+        catan.board.printBoard(tileNum)
+        print("please look at the open tile positions above, and the position map below to choose your settlement location")
+        catan.printExampleTile()
+        pos = 8
+        while(not (pos <=6 and pos >=1)):
+            pos = int(input("Please choose the position for your settlement (1-6)"))
+            if not (pos <=6 and pos >=1):
+                print("Invalid choice, please try again")
+
+
+    while(not gameCheck):
+        input("It is currently player %d's turn, please press any key to continue" % catan.currentPlayer)
+        actionList = catan.getActions()
+        if not len(actionList) == 1:
+            ...
+        else:
+            input("Please press enter to roll, you have no dev cards to use")
+            catan.rollDice()
+
+
+    
 '''
-    
-    
 catan = Game(1)
 catan.resourceMap()
 catan.beginGame()
@@ -193,3 +247,4 @@ catan.getActions()
 catan.printPlayerStats()
 catan.trade()
 catan.printPlayerStats()
+'''
