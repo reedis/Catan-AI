@@ -207,20 +207,17 @@ class Board:
         tilesList = self.getAdjTiles(tile.tileNumber, pos)
         initTile = self.getTile(tile.tileNumber)
         tilesList.append(initTile)
-        tempAdjList = tilesList
+        tempAdjList = tilesList.copy()
         spotVal = 0 
         for t in tilesList:
             if t:
-                if t.type == resourceType.DESERT:
-                    continue
-                else:
+                if not t.type == resourceType.DESERT:
                     resSpotsLeft = self.getResSpots(t.type, tempAdjList.remove(t))
                     ownedResSpots = player.resourceLocCount[t.type]
                     totalSpotsVal = self.totalSpots/(resSpotsLeft * (1 + ownedResSpots))
                     spotVal += t.getTileVal() * totalSpotsVal
-                    tempAdjList = tilesList
 
-        return spotVal
+        return spotVal / (4 - len(tilesList))
     
     def getResSpots(self, res, adjList):
         resTiles = self.getResTiles(res)

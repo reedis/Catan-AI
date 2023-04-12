@@ -222,11 +222,12 @@ while(not gameCheck):
             input("Please press enter to roll, you have no dev cards to use")
             catan.rollDice() 
 '''
-catan = Game(2)
+catan = Game(2, True)
 catan.beginGame()
-catan.buildSettlement(12, 5)
-catan.endTurn()
-print(catan.board.validSettlement(12, 5))
+print(catan.board.getSpotValue(catan.board.tileList[11], 5, catan.players[0]))
+#catan.buildSettlement(12, 5)
+#catan.endTurn()
+#print(catan.board.validSettlement(12, 5))
 print(catan.getSpotValueDict())
 '''
 catan.beginGame()
