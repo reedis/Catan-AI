@@ -146,15 +146,20 @@ class Game:
     def trade(self):
         self.players[self.currentPlayer].trade()
 
-    def getSpotValueDict(self):
-        dictVals = self.board.getAllSpotValues(self.players[self.currentPlayer])
-        maxMoves = []
-        maxVal = max(list(dictVals.values())) - .000002
-        for key,value in dictVals.items():
-            if value >= maxVal:
-                print(value)
-                maxMoves.append(key)
-        return maxMoves
+    def getSpotValueDict(self, offensive=True):
+        if offensive:
+            return self.offensiveMoves()
+        else:
+            return self.defensiveMoves()
+        
+    ## gets the max value move
+    def offensiveMoves(self):
+        return self.board.getMaxMove(self.players[self.currentPlayer])
+    
+    ## gets the move that minimizes the next turn the most
+    def defensiveMoves(self):
+        nextPlayer = (self.currentPlayer+1) % self.playerCount
+        self.board.getMinMove(self.players[nextPlayer], self.players[self.currentPlayer])
     
 
     # TODO: 
@@ -222,12 +227,13 @@ while(not gameCheck):
             input("Please press enter to roll, you have no dev cards to use")
             catan.rollDice() 
 '''
-catan = Game(2, True)
+catan = Game(2)
 catan.beginGame()
 print(catan.board.getSpotValue(catan.board.tileList[11], 5, catan.players[0]))
-#catan.buildSettlement(12, 5)
-#catan.endTurn()
-#print(catan.board.validSettlement(12, 5))
+catan.buildSettlement(14, 4)
+catan.endTurn()
+catan.buildSettlement(12, 5)
+catan.endTurn()
 print(catan.getSpotValueDict())
 '''
 catan.beginGame()

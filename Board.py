@@ -243,7 +243,16 @@ class Board:
                     spotDict[(t.tileNumber,i)] = float(self.getSpotValue(t, i, player))
 
         return spotDict
-                    
+    
+    def getMaxMove(self, player):
+        dictVals = self.getAllSpotValues(player)
+        maxMoves = []
+        maxVal = max(list(dictVals.values()))
+        for key,value in dictVals.items():
+            if value >= maxVal:
+                print(value)
+                maxMoves.append(key)
+        return maxMoves
 
     def getValidMoves(self, player, moves):
         def consecutiveRoads(roadList):
@@ -295,6 +304,17 @@ class Board:
                     moves.remove(actions.ROAD)
                 else:
                     moves[moves.index(actions.ROAD)] = (actions.ROAD, locationList)
+            return moves
+
+    # Place a settlement on a temp board to find min of next turn
+    def tempSettlement(self, tile, loc, player):
+        ...
+
+    # main func to find min next move
+    def getMinMove(self, nextPlayer, currentPlayer):
+        tempBoard = self.board.copy()
+        ...
+        
     
 
-        return moves
+       
