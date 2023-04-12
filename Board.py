@@ -9,6 +9,11 @@ class Board:
                       [None,None,None,None,None],
                       [None,None,None,None],
                       [None,None,None]]
+        self.tileList = [None, None, None, None, None, 
+                         None, None, None, None, None,
+                         None, None, None, None, None,
+                         None, None, None, None]
+        self.totalSpots = 54
         if randomBoard:
             self.randomBoard()
         else:
@@ -32,6 +37,7 @@ class Board:
             tile18 = Tile(resourceType.WHEAT, 6, 18)
             tile19 = Tile(resourceType.SHEEP, 11, 19)
             self.board = [[tile1, tile2, tile3], [tile4, tile5, tile6, tile7], [tile8, tile9, tile10, tile11, tile12], [tile13, tile14, tile15, tile16], [tile17, tile18, tile19]]
+            self.tileList = [tile1, tile2, tile3, tile4, tile5, tile6, tile7, tile8, tile9, tile10, tile11, tile12, tile13, tile14, tile15, tile16, tile17, tile18, tile19]
         self.setUp = True
     
     def randomBoard(self):
@@ -72,7 +78,9 @@ class Board:
                     if not randRes == resourceType.DESERT:
                         randDice = randomNum(diceProbs)
                         robber = False
-                    self.board[i][j] = Tile(randRes, randDice, tileCounter, robber)
+                    tile = Tile(randRes, randDice, tileCounter, robber)
+                    self.board[i][j] = tile
+                    self.tileList[tileCounter - 1] = tile
                     tileCounter += 1
                 continue
             if i == 1 or i == 3:
@@ -83,7 +91,9 @@ class Board:
                     if not randRes == resourceType.DESERT:
                         randDice = randomNum(diceProbs)
                         robber = False
-                    self.board[i][j] = Tile(randRes, randDice, tileCounter, robber)
+                    tile = Tile(randRes, randDice, tileCounter, robber)
+                    self.board[i][j] = tile
+                    self.tileList[tileCounter - 1] = tile                    
                     tileCounter += 1
                 continue
             else:
@@ -94,7 +104,9 @@ class Board:
                     if not randRes == resourceType.DESERT:
                         randDice = randomNum(diceProbs)
                         robber = False
-                    self.board[i][j] = Tile(randRes, randDice, tileCounter, robber)
+                    tile = Tile(randRes, randDice, tileCounter, robber)
+                    self.board[i][j] = tile
+                    self.tileList[tileCounter - 1] = tile      
                     tileCounter += 1
                 continue
    
@@ -132,26 +144,39 @@ class Board:
         placed = False
         tile = self.getTile(tileLoc)
         adjTiles = self.getAdjTiles(tileLoc, location)
-        trimmedAdj = self.trimAdj(location, adjTiles)
-        placed = tile.placeSettlement(location, player,  trimmedAdj, init)
+        placed = tile.placeSettlement(location, player, adjTiles, init)
+        if placed:
+            self.totalSpots -= 1
         return placed
     
     def placeRoad(self, tileLoc, location, player):
         placed = False
         tile = self.getTile(tileLoc)
         adjTiles = self.getAdjTiles(tileLoc, location)
-        placed = tile.placeRoad(location, player, self.trimAdj(location, adjTiles)[1])
+        placed = tile.placeRoad(location, player, adjTiles[1])
         return placed
     
     def getAdjTiles(self, tileNum, loc):
-        tileMapping = {1:(-1, 2, 5, 4, -1, -1), 2:(-1, 3, 6, 5, 1, -1), 3:(-1, -1, 7, 6, 2, -1), 
-                       4:(1, 5, 9, 8, -1, -1), 5:(2, 6, 10, 9, 4, 1), 6:(3, 7, 11, 10, 5, 2), 
-                       7:(-1, -1, 12, 11, 6, 3), 8:(4, 9, 13,-1,-1,-1), 9:(5, 10, 14, 13, 8, 4), 
-                       10:(6, 11, 15, 14, 9, 5), 11:(7, 12, 16, 15, 10, 6), 12:(-1, -1, -1, 16, 11, 7), 
-                       13:(9, 14, 17, -1, -1, 8), 14:(10, 15, 18, 17, 13, 9), 15:(11, 16, 19, 18, 14, 10), 
-                       16:(12, -1, -1, 19, 15, 11), 17:(14, 18, -1, -1, -1, 13), 18:(15, 19, -1, -1, 17, 14), 
-                       19:(16, -1, -1, -1, 18, 15)}
-        adjList = tileMapping.get(tileNum)
+        tileMapping = {1: ((-1, -1), (-1, 2), (2, 5), (4, 5), (-1, 4), (-1, -1)),
+                       2: ((-1, -1), (-1, 3), (6, 3), (5, 6), (1, 5), (-1, 1)), 
+                       3: ((-1, -1), (-1, -1), (-1, 7), (7, 6), (6, 2), (-1, 2)), 
+                       4: ((-1, 1), (1, 5), (5, 9), (9, 8), (8, -1), (-1, -1)), 
+                       5: ((1, 2), (2, 6), (6, 10), (10, 9), (9, 4), (4, 1)), 
+                       6: ((2, 3), (3, 7), (7, 11), (11, 10), (10, 5), (5, 2)), 
+                       7: ((-1, 3), (-1, -1), (-1, 12), (12, 11), (11, 6), (6, 3)), 
+                       8: ((-1, 4), (4, 9), (9, 13), (-1, 13), (-1, -1), (-1, -1)), 
+                       9: ((4, 5), (5, 10), (10, 14), (14, 13), (13, 8), (8, 4)), 
+                       10: ((5, 6), (6, 11), (11, 15), (15, 14), (14, 9), (9, 5)), 
+                       11: ((6, 7), (7, 12), (12, 16), (16, 15), (15, 10), (10, 6)), 
+                       12: ((-1, 7), (-1, -1), (-1, -1), (-1, 16), (16, 11), (11, 7)), 
+                       13: ((8, 9), (9, 14), (14, 17), (-1, 17), (-1, -1), (-1, 8)), 
+                       14: ((9, 10), (10, 15), (15, 18), (18, 17), (17, 13), (13, 9)), 
+                       15: ((10, 11), (11, 16), (16, 19), (19, 18), (18, 14), (14, 10)), 
+                       16: ((11, 12), (-1, 12), (-1, -1), (-1, 19), (19, 15), (15, 11)), 
+                       17: ((13, 14), (14, 18), (-1, 18), (-1, -1), (-1, -1), (-1, 13)), 
+                       18: ((14, 15), (15, 19), (-1, 19), (-1, -1), (-1, 17), (17, 14)), 
+                       19: ((15, 16), (-1, 16), (-1, -1), (-1, -1), (-1, 18), (18, 15))}
+        adjList = tileMapping[tileNum][loc - 1]
         tileList = []
         for index in adjList:
             if index == -1:
@@ -160,28 +185,8 @@ class Board:
                 tileList.append(self.getTile(index))
         return tileList
     
-    def trimAdj(self, loc, adjList):
-        toCheck = []
-        if loc == 1:
-            toCheck.append(adjList[5])
-            toCheck.append(adjList[0])
-        elif loc == 2:
-            toCheck.append(adjList[0])
-            toCheck.append(adjList[1])
-        elif loc == 3:
-            toCheck.append(adjList[1])
-            toCheck.append(adjList[2])
-        elif loc == 4:
-            toCheck.append(adjList[2])
-            toCheck.append(adjList[3])
-        elif loc == 5:
-            toCheck.append(adjList[3])
-            toCheck.append(adjList[4])
-        elif loc == 6:
-            toCheck.append(adjList[4])
-            toCheck.append(adjList[5])
-
-        return toCheck
+    def validSettlement(self, tile, loc):
+        return self.getTile(tile).validSettlementLocation(loc, self.getAdjTiles(tile, loc))
 
     def getTile(self, tileNumber):
         tileCounter = 1
@@ -191,7 +196,58 @@ class Board:
                     return tile
                 else:
                      tileCounter += 1
+
+    def printTile(self, tileNumber):
+        tile = self.getTile(tileNumber)
+        num = tile.diceNumber
+        res = tile.type
+        ...
+        
+    def getSpotValue(self, tile, pos, player):
+        tilesList = self.getAdjTiles(tile.tileNumber, pos)
+        initTile = self.getTile(tile.tileNumber)
+        tilesList.append(initTile)
+        tempAdjList = tilesList
+        spotVal = 0 
+        for t in tilesList:
+            if t:
+                if t.type == resourceType.DESERT:
+                    continue
+                else:
+                    resSpotsLeft = self.getResSpots(t.type, tempAdjList.remove(t))
+                    ownedResSpots = player.resourceLocCount[t.type]
+                    totalSpotsVal = self.totalSpots/(resSpotsLeft * (1 + ownedResSpots))
+                    spotVal += t.getTileVal() * totalSpotsVal
+                    tempAdjList = tilesList
+
+        return spotVal
     
+    def getResSpots(self, res, adjList):
+        resTiles = self.getResTiles(res)
+        totalResSpots = 0
+        for tile in resTiles:
+            totalResSpots += tile.openSpotCount(adjList)
+        
+        return totalResSpots
+
+    def getResTiles(self, res):
+        retList = []
+        for tile in self.tileList:
+            if tile.type == res:
+                retList.append(tile)
+
+        return retList
+    
+    def getAllSpotValues(self, player):
+        spotDict = {}
+        for t in self.tileList:
+            for i in range(1,7):
+                if not (t, i) in spotDict and self.validSettlement(t.tileNumber, i):
+                    spotDict[(t.tileNumber,i)] = float(self.getSpotValue(t, i, player))
+
+        return spotDict
+                    
+
     def getValidMoves(self, player, moves):
         def consecutiveRoads(roadList):
             roadDict = {}
@@ -209,12 +265,12 @@ class Board:
             tile = self.getTile(tileNum)
             retList = []
             nextLoc = (loc + 1) % 6
-            if tile.validRoadPlace(nextLoc, player.playerNum, self.trimAdj(nextLoc, self.getAdjTiles(tileNum, nextLoc))[1]):
+            if tile.validRoadPlace(nextLoc, player.playerNum, self.getAdjTiles(tileNum, nextLoc)[1]):
                 retList.append((tileNum, nextLoc))
 
             prevLoc = (loc - 1) % 6
 
-            if tile.validRoadPlace(prevLoc, player.playerNum, self.trimAdj(prevLoc, self.getAdjTiles(tileNum, prevLoc))[1]):
+            if tile.validRoadPlace(prevLoc, player.playerNum, self.getAdjTiles(tileNum, prevLoc)[1]):
                 retList.append((tileNum, prevLoc))
             
             return retList

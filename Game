@@ -27,7 +27,7 @@ class Game:
         
     def buildSettlement(self, tileNumber, location):
         if self.players[self.currentPlayer].buildSettlement(tileNumber, location) or self.inSetUp():
-            if self.board.placeSettlement(tileNumber, location, self.currentPlayer, self.inSetUp):
+            if self.board.placeSettlement(tileNumber, location, self.players[self.currentPlayer], self.inSetUp):
                 print("settlement placed at tile %d, location %d, by player %d" % (tileNumber, location, self.currentPlayer))
             else:
                 print("issue placing settlement please try again")
@@ -146,12 +146,22 @@ class Game:
     def trade(self):
         self.players[self.currentPlayer].trade()
 
+    def getSpotValueDict(self):
+        dictVals = self.board.getAllSpotValues(self.players[self.currentPlayer])
+        maxMoves = []
+        maxVal = max(list(dictVals.values())) - .000002
+        for key,value in dictVals.items():
+            if value >= maxVal:
+                print(value)
+                maxMoves.append(key)
+        return maxMoves
+
     # TODO: trading with other players?
     # could result in a loop if the agent really wants to make a trade
     # maybe limit how many times a player can ask for a trade? 
 
         
-
+'''
 gameCheck = False
 while(not gameCheck):
     playerCount = int(input("How many players? "))
@@ -202,13 +212,15 @@ while(not gameCheck):
             ...
         else:
             input("Please press enter to roll, you have no dev cards to use")
-            catan.rollDice()
-
-
-    
+            catan.rollDice() 
 '''
-catan = Game(1)
-catan.resourceMap()
+catan = Game(2)
+catan.beginGame()
+catan.buildSettlement(12, 5)
+catan.endTurn()
+print(catan.board.validSettlement(12, 5))
+print(catan.getSpotValueDict())
+'''
 catan.beginGame()
 catan.resourceMap()
 catan.buildSettlement(13, 3)

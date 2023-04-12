@@ -19,6 +19,7 @@ class Tile:
         self.road4 = ("NONE", None)
         self.road5 = ("NONE", None)
         self.road6 = ("NONE", None)
+        self.spotList = [self.spot1, self.spot2, self.spot3, self.spot4, self.spot5, self.spot6]
         self.robber = robber
 
     def print(self):
@@ -70,40 +71,63 @@ class Tile:
             name = (", " + str(self.road6[1])) if (not (self.road6[1] == None)) else ''
             return (self.road6[0] +name)
 
-    def placeSettlement(self, location, player, adjList, init=False):
-        def validPlace():
-            if location == 1:
-                return (self.spot6[1] == None) and (self.spot2[1] == None)
-            elif location == 2:
-                return (self.spot1[1] == None) and (self.spot3[1] == None)
-            elif location == 3:
-                return (self.spot2[1] == None) and (self.spot4[1] == None)
-            elif location == 4:
-                return (self.spot3[1] == None) and (self.spot5[1] == None)
-            elif location == 5:
-                return (self.spot4[1] == None) and (self.spot6[1] == None)
-            elif location == 6:
-                return (self.spot5[1] == None) and (self.spot1[1] == None)
-            else:
-                return False
+    def validSettlementLocation(self, location, adjList):
+            def locCheck():
+                if location == 1:
+                    return (self.spot6[1] == None) and (self.spot2[1] == None)
+                elif location == 2:
+                    return (self.spot1[1] == None) and (self.spot3[1] == None)
+                elif location == 3:
+                    return (self.spot2[1] == None) and (self.spot4[1] == None)
+                elif location == 4:
+                    return (self.spot3[1] == None) and (self.spot5[1] == None)
+                elif location == 5:
+                    return (self.spot4[1] == None) and (self.spot6[1] == None)
+                elif location == 6:
+                    return (self.spot5[1] == None) and (self.spot1[1] == None)
+                else:
+                    return False
             
+            def neighborCheck():
+                firstCheck, secondCheck = True, True
+                if adjList:
+                    if location == 1:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot2[1] == None) and (adjList[0].spot3[1] == None) and (adjList[0].spot4[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot4[1] == None) and (adjList[1].spot5[1] == None) and (adjList[1].spot6[1] == None)
+                    elif location == 2:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot3[1] == None) and (adjList[0].spot4[1] == None) and (adjList[0].spot5[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot5[1] == None) and (adjList[1].spot6[1] == None) and (adjList[1].spot1[1] == None)
+                    elif location == 3:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot4[1] == None) and (adjList[0].spot5[1] == None) and (adjList[0].spot6[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot6[1] == None) and (adjList[1].spot1[1] == None) and (adjList[1].spot2[1] == None)
+                    elif location == 4:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot5[1] == None) and (adjList[0].spot6[1] == None) and (adjList[0].spot1[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot1[1] == None) and (adjList[1].spot2[1] == None) and (adjList[1].spot3[1] == None)
+                    elif location == 5:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot6[1] == None) and (adjList[0].spot1[1] == None) and (adjList[0].spot2[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot2[1] == None) and (adjList[1].spot3[1] == None) and (adjList[1].spot4[1] == None)
+                    elif location == 6:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot1[1] == None) and (adjList[0].spot2[1] == None) and (adjList[0].spot3[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot3[1] == None) and (adjList[1].spot4[1] == None) and (adjList[1].spot5[1] == None)
+                return firstCheck and secondCheck
+            return locCheck() and neighborCheck()
+
+    def placeSettlement(self, location, playerClass, adjList, init=False):
+        player = playerClass.playerNum
+
         def roadCheck():
-            if location == 1:
-                return (self.road6[1] == player) or (self.road2[1] == player)
-            elif location == 2:
-                return (self.road1[1] == player) or (self.road3[1] == player)
-            elif location == 3:
-                return (self.road2[1] == player) or (self.road4[1] == player)
-            elif location == 4:
-                return (self.road3[1] == player) or (self.road5[1] == player)
-            elif location == 5:
-                return (self.road4[1] == player) or (self.road6[1] == player)
-            elif location == 6:
-                return (self.road5[1] == player) or (self.road1[1] == player)
-            else:
-                return False
-        
-        def neighborCheck():
             firstCheck, secondCheck = True, True
             if location == 1:
                 if adjList[0]:
@@ -137,9 +161,11 @@ class Tile:
                     secondCheck = (adjList[1].spot3[1] == None) and (adjList[1].spot4[1] == None) and (adjList[1].spot5[1] == None)
             return firstCheck and secondCheck
 
-        boolcheck = validPlace() if init else (validPlace() and roadCheck())
+        boolcheck = self.validSettlementLocation(location, adjList) 
+        if init:
+            boolcheck = boolcheck and roadCheck()
             
-        if (boolcheck and neighborCheck()):
+        if boolcheck:
             if location == 1:
                 self.spot1 = ("SETTLEMENT", player)
                 if adjList[0]:
@@ -176,6 +202,13 @@ class Tile:
                     adjList[0].updateSettlement(2, player)
                 if adjList[1]:
                     adjList[1].updateSettlement(4, player)
+
+            if adjList[0]:
+                playerClass.updateResLocCount(adjList[0].type)
+            if adjList[1]:
+                playerClass.updateResLocCount(adjList[1].type)
+            
+            playerClass.updateResLocCount(self.type)
             return True
         return False
     
@@ -287,6 +320,20 @@ class Tile:
         else:
             return False
         
+    def getTileVal(self):
+        diceProbs = {2: 1/36, 3: 1/18, 4: 1/12, 5: 1/9, 6: 5/36, 8: 5/36, 9: 1/9, 10: 1/12, 11: 1/18, 12: 1/36}
+        resVals = {resourceType.BRICK: 1/6, resourceType.ORE: 2.2/3, resourceType.WHEAT: 3.2/6, resourceType.SHEEP: 1.2/5, resourceType.WOOD: 1/6}
+
+        return (diceProbs[self.diceNumber]*resVals[self.type])
+        
+    def openSpotCount(self, adjList):
+        spotList = []
+        for i in range(1,7):
+            if self.validSettlementLocation(i, adjList):
+                spotList.append(i)
+
+        return len(spotList)
+
     def getPayment(self, playerDict):
         if not self.robber:
             if not self.spot1[1] == None:

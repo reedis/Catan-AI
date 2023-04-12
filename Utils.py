@@ -22,5 +22,3 @@ class devCards(Enum):
     MONOPOLY = "MONOPOLY" 
     VP = "VP" 
     ROADBUILDER = "ROADBUILDER"
-
-

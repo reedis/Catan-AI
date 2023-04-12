@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 class Player(ABC):
     def __init__(self, playerNum):
         self.resources = {resourceType.BRICK: 0, resourceType.ORE: 0, resourceType.SHEEP: 0, resourceType.WHEAT: 0, resourceType.WOOD: 0}
+        self.resourceLocCount = {resourceType.BRICK: 0, resourceType.ORE: 0, resourceType.SHEEP: 0, resourceType.WHEAT: 0, resourceType.WOOD: 0}
         self.settlementLoc = []
         self.roadLoc = []
         self.totalCards = 0
@@ -33,6 +34,9 @@ class Player(ABC):
             return True
         else:
             return False
+        
+    def updateResLocCount(self, res):
+        self.resourceLocCount[res] += 1
     
     def buildRoad(self, tile, loc):
         if self.roads != 0 and self.roadRes():
