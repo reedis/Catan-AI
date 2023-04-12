@@ -155,10 +155,18 @@ class Game:
                 print(value)
                 maxMoves.append(key)
         return maxMoves
+    
 
-    # TODO: trading with other players?
-    # could result in a loop if the agent really wants to make a trade
-    # maybe limit how many times a player can ask for a trade? 
+    # TODO: 
+    # trading with other players?:
+    #   could result in a loop if the agent really wants to make a trade
+    #   maybe limit how many times a player can ask for a trade? 
+    # spotValue:
+    #   allowing for building too close
+    #   not taking into account # of tiles -- single tile location weighted higher than some triplets
+    #   --very close
+    #   add resource/number spreading/conglomeration strategies
+
 
         
 '''
