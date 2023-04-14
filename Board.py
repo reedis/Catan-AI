@@ -244,15 +244,7 @@ class Board:
 
         return spotDict
     
-    def getMaxMove(self, player):
-        dictVals = self.getAllSpotValues(player)
-        maxMoves = []
-        maxVal = max(list(dictVals.values()))
-        for key,value in dictVals.items():
-            if value >= maxVal:
-                print(value)
-                maxMoves.append(key)
-        return maxMoves
+    
 
     def getValidMoves(self, player, moves):
         def consecutiveRoads(roadList):
@@ -310,11 +302,55 @@ class Board:
     def tempSettlement(self, tile, loc, player):
         ...
 
+    def getMaxMove(self, player):
+        dictVals = self.getAllSpotValues(player)
+        maxMoves = []
+        maxVal = max(list(dictVals.values()))
+        for key,value in dictVals.items():
+            if value >= maxVal:
+                print(value)
+                maxMoves.append(key)
+        return maxMoves
+
     # main func to find min next move
     def getMinMove(self, nextPlayer, currentPlayer):
         tempBoard = self.board.copy()
         ...
         
-    
+    def getMaxRoad(self, tileNum, loc, player):
+        ## recursion depth is based on how many roads left
+        recDepth = min(player.roads, 5)
+        initialOptions = tileRoadMapping[(tileNum, loc)]
+        return self.recRoadFinder(initialOptions, 0, recDepth, player, 0)
 
-       
+    def recRoadFinder(self, initMaping, acc, rec, player, depth):
+        returnMap = {}
+        if rec == 0:
+            return acc
+        
+
+        rec -= 1
+        for key, value in initMaping.items():
+
+            acc += self.recRoadFinder(tileRoadMapping[value], acc, rec, player, depth + 1)
+            if self.validSettlement(value[0], value[1]):
+                acc += self.getSpotValue(self.getTile(value[0]), value[1], player)
+            returnMap[value] = acc
+            acc = 0
+ 
+
+        maxDictVal = max(list(returnMap.values()))
+
+        for key, value in returnMap.items():
+            if value == maxDictVal:
+                if depth == 0:
+                    return key
+                else:
+                    return value
+
+
+
+    def getRoadOptions(tile, adj):
+        ...
+
+    

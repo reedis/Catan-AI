@@ -161,6 +161,8 @@ class Game:
         nextPlayer = (self.currentPlayer+1) % self.playerCount
         self.board.getMinMove(self.players[nextPlayer], self.players[self.currentPlayer])
     
+    def getMaxRoad(self, tile, loc):
+        return self.board.getMaxRoad(tile, loc, self.players[self.currentPlayer])
 
     # TODO: 
     # trading with other players?:
@@ -171,6 +173,10 @@ class Game:
     #   not taking into account # of tiles -- single tile location weighted higher than some triplets
     #   --very close
     #   add resource/number spreading/conglomeration strategies
+    # RoadValue
+    #   find a way to evaulate road placements
+    # defensive/offensive:
+    #   ExpectiMax vs ExpectiMini
 
 
         
@@ -227,14 +233,11 @@ while(not gameCheck):
             input("Please press enter to roll, you have no dev cards to use")
             catan.rollDice() 
 '''
-catan = Game(2)
+catan = Game(1)
 catan.beginGame()
-print(catan.board.getSpotValue(catan.board.tileList[11], 5, catan.players[0]))
-catan.buildSettlement(14, 4)
-catan.endTurn()
-catan.buildSettlement(12, 5)
-catan.endTurn()
 print(catan.getSpotValueDict())
+catan.buildSettlement(14, 3)
+print(catan.getMaxRoad(14, 3))
 '''
 catan.beginGame()
 catan.resourceMap()
