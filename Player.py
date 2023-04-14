@@ -3,7 +3,7 @@ from Utils import *
 from abc import ABC, abstractmethod
 
 class Player(ABC):
-    def __init__(self, playerNum):
+    def __init__(self, playerNum, AI=False):
         self.resources = {resourceType.BRICK: 0, resourceType.ORE: 0, resourceType.SHEEP: 0, resourceType.WHEAT: 0, resourceType.WOOD: 0}
         self.resourceLocCount = {resourceType.BRICK: 0, resourceType.ORE: 0, resourceType.SHEEP: 0, resourceType.WHEAT: 0, resourceType.WOOD: 0}
         self.settlementLoc = []
@@ -18,6 +18,7 @@ class Player(ABC):
         self.playerNum = playerNum
         self.hasRolled = False
         self.devCardsUsed = 0
+        self.isAI = AI
     
     def endTurn(self):
         self.hasRolled = False
@@ -244,7 +245,7 @@ class HumanPlayer(Player):
 
 class AutoPlayer(Player):
     def __init__(self, playerNum):
-        super().__init__(playerNum)
+        super().__init__(playerNum, True)
     
     def trade(self):
         ...

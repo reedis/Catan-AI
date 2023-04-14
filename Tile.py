@@ -243,7 +243,6 @@ class Tile:
     def validRoadPlace(self, location, player, adj, setUp):
         def neighborCheck():
             if adj:
-                print(adj)
                 if location == 1:
                     return adj.road4[1] == None
                 elif location == 2:

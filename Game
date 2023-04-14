@@ -3,10 +3,11 @@ from Tile import *
 from Player import *
 from Utils import *
 import random
+import os
 
 
 class Game:
-    def __init__(self, playerCount, randomStart=False):
+    def __init__(self, playerCount, randomStart=False, aiPlayer = 2):
         self.playerCount = playerCount
         self.currentPlayer = 0
         self.board = Board(randomStart)
@@ -14,10 +15,16 @@ class Game:
         self.players = []
         self.devCards = {devCards.KNIGHT: 14, devCards.MONOPOLY: 2, devCards.ROADBUILDER: 2, devCards.YEAROFPLENTY: 2, devCards.VP: 5}
         for i in range(0, playerCount):
-            self.players.append(HumanPlayer(i))
+            if i == (aiPlayer - 1):
+                self.players.append(AutoPlayer(i))
+            else:
+                self.players.append(HumanPlayer(i))
 
+    def getCurrentPlayer(self):
+        return self.players[self.currentPlayer]
+    
     def endTurn(self):
-        self.players[self.currentPlayer].endTurn()
+        self.getCurrentPlayer().endTurn()
         self.currentPlayer = (self.currentPlayer+1) % self.playerCount
         if self.currentPlayer == 0:
             self.round += 1 
@@ -26,8 +33,8 @@ class Game:
         print("It is player%d's turn now, round %d" % (self.currentPlayer, self.round))
         
     def buildSettlement(self, tileNumber, location):
-        if self.players[self.currentPlayer].buildSettlement(tileNumber, location) or self.inSetUp():
-            if self.board.placeSettlement(tileNumber, location, self.players[self.currentPlayer], self.inSetUp):
+        if self.getCurrentPlayer().buildSettlement(tileNumber, location) or self.inSetUp():
+            if self.board.placeSettlement(tileNumber, location, self.getCurrentPlayer(), self.inSetUp):
                 print("settlement placed at tile %d, location %d, by player %d" % (tileNumber, location, self.currentPlayer))
             else:
                 print("issue placing settlement please try again")
@@ -35,8 +42,8 @@ class Game:
             print("No settlements left")
         
     def buildRoad(self, tileNumber, location):
-        if self.players[self.currentPlayer].buildRoad(tileNumber, location) or self.inSetUp():
-            if self.board.placeRoad(tileNumber, location, self.players[self.currentPlayer], self.inSetUp()):
+        if self.getCurrentPlayer().buildRoad(tileNumber, location) or self.inSetUp():
+            if self.board.placeRoad(tileNumber, location, self.getCurrentPlayer(), self.inSetUp()):
                 print("Road placed at tile %d, location %d, by player %d" % (tileNumber, location, self.currentPlayer))
             else:
                 print("issue placing Road please try again")
@@ -79,7 +86,7 @@ class Game:
         print("         "+ resList[4])
 
     def rollDice(self, input=-1):
-        self.players[self.currentPlayer].hasRolled = True
+        self.getCurrentPlayer().hasRolled = True
         dice = [1,2,3,4,5,6]       
         roll = (random.choice(dice) + random.choice(dice)) if (input == -1) else input
         print("You Rolled a " + str(roll)) 
@@ -114,8 +121,8 @@ class Game:
         print("")
 
     def getActions(self):
-        actionList = self.players[self.currentPlayer].getMoves()
-        actionList = self.board.getValidMoves(self.players[self.currentPlayer], actionList)
+        actionList = self.getCurrentPlayer().getMoves()
+        actionList = self.board.getValidMoves(self.getCurrentPlayer(), actionList)
         return actionList
      
     def gameOver(self):
@@ -125,11 +132,11 @@ class Game:
                 return False
         return True
     
-    def playTurn(self):
-        if self.inSetUp():
-            self.players[self.playerCount].playSetupTurn()
-        else:
-            self.players[self.playerCount].playTurn()
+    def playTurn(self, type):
+        if type == 1:
+            self.executeOffensivePlay()
+        elif type == 2:
+            self.executeDefensivePlay()
 
     def printExampleTile(self):
         one = ('-------------spot 1---------------')
@@ -144,7 +151,7 @@ class Game:
             print(p)
 
     def trade(self):
-        self.players[self.currentPlayer].trade()
+        self.getCurrentPlayer().trade()
 
     def getSpotValueDict(self, offensive=True):
         if offensive:
@@ -154,7 +161,7 @@ class Game:
         
     ## gets the max value move
     def executeOffensivePlay(self):
-        player = self.players[self.currentPlayer]
+        player = self.getCurrentPlayer()
         maxSettlement = self.board.getMaxMove(player)[0]
         self.buildSettlement(maxSettlement[0], maxSettlement[1])
         maxRoad = self.board.getMaxRoad(maxSettlement[0], maxSettlement[1], player)
@@ -162,12 +169,12 @@ class Game:
         return maxSettlement, maxRoad
     
     ## gets the move that minimizes the next turn the most
-    def defensiveMoves(self):
+    def executeDefensivePlay(self):
         nextPlayer = (self.currentPlayer+1) % self.playerCount
-        self.board.getMinMove(self.players[nextPlayer], self.players[self.currentPlayer])
+        self.board.getMinMove(self.players[nextPlayer], self.getCurrentPlayer())
     
     def getMaxRoad(self, tile, loc):
-        return self.board.getMaxRoad(tile, loc, self.players[self.currentPlayer])
+        return self.board.getMaxRoad(tile, loc, self.getCurrentPlayer())
 
     # TODO: 
     # trading with other players?:
@@ -182,67 +189,99 @@ class Game:
     #   find a way to evaulate road placements
     # defensive/offensive:
     #   ExpectiMax vs ExpectiMini
-
-
-        
-'''
-gameCheck = False
-while(not gameCheck):
-    playerCount = int(input("How many players? "))
-    rand = input("Do you want a random board? Y/N ").lower().strip()
-    rand = (rand == 'y')
-    catan = Game(playerCount, rand)
-    catan.resourceMap()
-    catan.beginGame()
+def setUp():
     while(catan.inSetUp()):
-        option = input("Will player %d please place their first settlement type M to see the resource map again, \ntype A to see the array again, or press anything else to build " % catan.currentPlayer).lower().strip()
-        if option == 'm':
-            catan.resourceMap()
-            yn = input("Would you like to see the array? Y/N ").lower().strip()
-            if yn == 'y':
-                catan.beginGame()
-        elif option == 'a':
-            catan.beginGame()
-            yn = input("Would you like to see the resource map? Y/N ").lower().strip()
-            if yn == 'y':
-                catan.resourceMap()
-
-        tileNum = 200000
-        while(not tileNum <= 19 and tileNum >=1):
-            tileNum = int(input("Please input the tile nuber you want to build on: ").lower().strip())
-            if(tileNum <= 19 and tileNum >=1):
-                tile = catan.board.getTile(tileNum)
-                yn = input("You want to build on tile %d, the %s with the dice number of %d on it? Y/N " % (tileNum, tile.type.value, tile.diceNumber)).lower().strip()
-                if yn == 'n':
-                    tileNum = 2000000
-                    input("Press any key to try again")
-            else:
-                input("Invalid number (Valid range: 1-19), press any key to try again")
-        
-        catan.board.printBoard(tileNum)
-        print("please look at the open tile positions above, and the position map below to choose your settlement location")
-        catan.printExampleTile()
-        pos = 8
-        while(not (pos <=6 and pos >=1)):
-            pos = int(input("Please choose the position for your settlement (1-6)"))
-            if not (pos <=6 and pos >=1):
-                print("Invalid choice, please try again")
-
-
-    while(not gameCheck):
-        input("It is currently player %d's turn, please press any key to continue" % catan.currentPlayer)
-        actionList = catan.getActions()
-        if not len(actionList) == 1:
-            ...
+        if catan.getCurrentPlayer().isAI:
+            catan.playTurn(1)
+            catan.endTurn()
         else:
-            input("Please press enter to roll, you have no dev cards to use")
-            catan.rollDice() 
+            option = input("Will player %d please place their first settlement type M to see the resource map again, \ntype A to see the array again, or press anything else to build " % catan.currentPlayer).lower().strip()
+            if option == 'm':
+                catan.resourceMap()
+                yn = input("Would you like to see the array? Y/N ").lower().strip()
+                if yn == 'y':
+                    catan.beginGame()
+            elif option == 'a':
+                catan.beginGame()
+                yn = input("Would you like to see the resource map? Y/N ").lower().strip()
+                if yn == 'y':
+                    catan.resourceMap()
+
+            tileNum = 200000
+            while(not tileNum <= 19 and tileNum >=1):
+                tileNum = int(input("Please input the tile nuber you want to build on: ").lower().strip())
+                if(tileNum <= 19 and tileNum >=1):
+                    tile = catan.board.getTile(tileNum)
+                    yn = input("You want to build on tile %d, the %s with the dice number of %d on it? Y/N " % (tileNum, tile.type.value, tile.diceNumber)).lower().strip()
+                    if yn == 'n':
+                        tileNum = 2000000
+                        input("Press any key to try again")
+                else:
+                    input("Invalid number (Valid range: 1-19), press any key to try again")
+            
+            catan.board.printBoard(tileNum)
+            print("please look at the open tile positions above, and the position map below to choose your settlement location")
+            catan.printExampleTile()
+            pos = 8
+            while(not (pos <=6 and pos >=1)):
+                pos = int(input("Please choose the position for your settlement (1-6) "))
+                if not (pos <=6 and pos >=1):
+                    print("Invalid choice, please try again")
+            
+            yn = input("You want to build on tile %d at location %d? Is that correct? Y/N " % (tileNum, pos)).lower().strip()
+            if yn == 'y':
+                catan.buildSettlement(tileNum, pos)   
+            else:
+                print("Lets begin again")
+                setUp()
+            
+            validRoad = False
+            while(not validRoad):
+                print("Time to build a road, the road Locations you can build from are (tileNumber, roadPosition):")
+                options = tileRoadMapping[(tileNum, pos)]
+                print(options)
+                tn = int(input("Please input the tile number from the above choices for your road: "))
+                ps = int(input("Please input the road position from the above choices for your road: "))
+                validRoad = (tn, ps) in options
+
+            catan.buildRoad(tn, ps)
+            catan.endTurn()
+
+    input("Set up is completed, please press enter to continue")
+    os.system('clear')
+
+
+gameCheck = False
+
+print("Welcome to the 2 player Game Catan AI, player 0 is human, player 1 is the AI")
+input("Please press enter to continue")
+
+rand = input("Do you want a random board? Y/N ").lower().strip()
+rand = (rand == 'y')
+catan = Game(2, rand, 2)
+catan.resourceMap()
+catan.beginGame()
+setUp()
+    
+
+
+
+while(not gameCheck):
+    input("It is currently player %d's turn, please press any key to continue" % catan.currentPlayer)
+    actionList = catan.getActions()
+    if not len(actionList) == 1:
+        ...
+    else:
+        input("Please press enter to roll, you have no dev cards to use")
+        catan.rollDice() 
+
+
 '''
 catan = Game(1)
 catan.beginGame()
 print(catan.executeOffensivePlay())
 catan.beginGame()
-'''
+
 catan.beginGame()
 catan.resourceMap()
 catan.buildSettlement(13, 3)

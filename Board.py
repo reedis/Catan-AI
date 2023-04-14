@@ -153,9 +153,6 @@ class Board:
         placed = False
         tile = self.getTile(tileLoc)
         adjTiles = self.getAdjTiles(tileLoc, location)
-        print(tileLoc)
-        print(location)
-        print(adjTiles[1].tileNumber)
         placed = tile.placeRoad(location, player, adjTiles[1], setUp)
         return placed
     
@@ -311,7 +308,6 @@ class Board:
         maxVal = max(list(dictVals.values()))
         for key,value in dictVals.items():
             if value >= maxVal:
-                print(value)
                 maxMoves.append(key)
         return maxMoves
 
