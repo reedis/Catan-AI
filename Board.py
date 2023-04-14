@@ -149,11 +149,14 @@ class Board:
             self.totalSpots -= 1
         return placed
     
-    def placeRoad(self, tileLoc, location, player):
+    def placeRoad(self, tileLoc, location, player, setUp):
         placed = False
         tile = self.getTile(tileLoc)
         adjTiles = self.getAdjTiles(tileLoc, location)
-        placed = tile.placeRoad(location, player, adjTiles[1])
+        print(tileLoc)
+        print(location)
+        print(adjTiles[1].tileNumber)
+        placed = tile.placeRoad(location, player, adjTiles[1], setUp)
         return placed
     
     def getAdjTiles(self, tileNum, loc):

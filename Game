@@ -36,7 +36,7 @@ class Game:
         
     def buildRoad(self, tileNumber, location):
         if self.players[self.currentPlayer].buildRoad(tileNumber, location) or self.inSetUp():
-            if self.board.placeRoad(tileNumber, location, self.players[self.currentPlayer]):
+            if self.board.placeRoad(tileNumber, location, self.players[self.currentPlayer], self.inSetUp()):
                 print("Road placed at tile %d, location %d, by player %d" % (tileNumber, location, self.currentPlayer))
             else:
                 print("issue placing Road please try again")
@@ -148,13 +148,18 @@ class Game:
 
     def getSpotValueDict(self, offensive=True):
         if offensive:
-            return self.offensiveMoves()
+            return self.executeOffensivePlay()
         else:
             return self.defensiveMoves()
         
     ## gets the max value move
-    def offensiveMoves(self):
-        return self.board.getMaxMove(self.players[self.currentPlayer])
+    def executeOffensivePlay(self):
+        player = self.players[self.currentPlayer]
+        maxSettlement = self.board.getMaxMove(player)[0]
+        self.buildSettlement(maxSettlement[0], maxSettlement[1])
+        maxRoad = self.board.getMaxRoad(maxSettlement[0], maxSettlement[1], player)
+        self.buildRoad(maxRoad[0], maxRoad[1])
+        return maxSettlement, maxRoad
     
     ## gets the move that minimizes the next turn the most
     def defensiveMoves(self):
@@ -235,9 +240,8 @@ while(not gameCheck):
 '''
 catan = Game(1)
 catan.beginGame()
-print(catan.getSpotValueDict())
-catan.buildSettlement(14, 3)
-print(catan.getMaxRoad(14, 3))
+print(catan.executeOffensivePlay())
+catan.beginGame()
 '''
 catan.beginGame()
 catan.resourceMap()

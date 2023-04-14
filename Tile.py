@@ -240,9 +240,10 @@ class Tile:
         elif location == 6:
             self.road6 = ("ROAD", player)
     
-    def validRoadPlace(self, location, player, adj):
+    def validRoadPlace(self, location, player, adj, setUp):
         def neighborCheck():
             if adj:
+                print(adj)
                 if location == 1:
                     return adj.road4[1] == None
                 elif location == 2:
@@ -258,39 +259,42 @@ class Tile:
             return True
         
         retBool = False
-        if location == 1:
-            retBool = ((self.road1[1] == None) and (self.spot1[1] == player) or 
-                       (self.spot6[1] == player) or (self.road6[1] == player) or 
-                       (self.road2[1] == player))
-        elif location == 2:
-            retBool =  ((self.road2[1] == None) and (self.spot2[1] == player) or 
-                        (self.spot1[1] == player) or (self.road1[1] == player) or 
-                        (self.road3[1] == player))
-        elif location == 3:
-            retBool =  ((self.road3[1] == None) and (self.spot3[1] == player) or 
-                        (self.spot2[1] == player) or (self.road2[1] == player) or 
-                        (self.road4[1] == player))
-        elif location == 4:
-            retBool =  ((self.road4[1] == None) and (self.spot4[1] == player) or 
-                        (self.spot3[1] == player) or (self.road3[1] == player) or 
-                        (self.road5[1] == player))
-        elif location == 5:
-            retBool =  ((self.road5[1] == None) and (self.spot5[1] == player) or 
-                        (self.spot4[1] == player) or (self.road4[1] == player) or 
-                        (self.road6[1] == player))
-        elif location == 6:
-            retBool =  ((self.road6[1] == None) and (self.spot6[1] == player) or 
-                        (self.spot5[1] == player) or (self.road5[1] == player) or 
-                        (self.road1[1] == player))
+        if not setUp:
+            if location == 1:
+                retBool = ((self.road1[1] == None) and (self.spot1[1] == player) or 
+                        (self.spot6[1] == player) or (self.road6[1] == player) or 
+                        (self.road2[1] == player))
+            elif location == 2:
+                retBool =  ((self.road2[1] == None) and (self.spot2[1] == player) or 
+                            (self.spot1[1] == player) or (self.road1[1] == player) or 
+                            (self.road3[1] == player))
+            elif location == 3:
+                retBool =  ((self.road3[1] == None) and (self.spot3[1] == player) or 
+                            (self.spot2[1] == player) or (self.road2[1] == player) or 
+                            (self.road4[1] == player))
+            elif location == 4:
+                retBool =  ((self.road4[1] == None) and (self.spot4[1] == player) or 
+                            (self.spot3[1] == player) or (self.road3[1] == player) or 
+                            (self.road5[1] == player))
+            elif location == 5:
+                retBool =  ((self.road5[1] == None) and (self.spot5[1] == player) or 
+                            (self.spot4[1] == player) or (self.road4[1] == player) or 
+                            (self.road6[1] == player))
+            elif location == 6:
+                retBool =  ((self.road6[1] == None) and (self.spot6[1] == player) or 
+                            (self.spot5[1] == player) or (self.road5[1] == player) or 
+                            (self.road1[1] == player))
+            else:
+                retBool =  False
         else:
-            retBool =  False
+            retBool = True
         
         return retBool and neighborCheck()
             
-    def placeRoad(self, location, play, adj):
+    def placeRoad(self, location, play, adj, setUp):
         player = play.playerNum
         tn = self.tileNumber
-        if self.validRoadPlace(location, player, adj):
+        if self.validRoadPlace(location, player, adj, setUp):
             play.roadLoc.append((tn, location))
             if location == 1:
                 self.road1 = ("ROAD", player)
