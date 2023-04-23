@@ -71,6 +71,9 @@ class Tile:
             name = (", " + str(self.road6[1])) if (not (self.road6[1] == None)) else ''
             return (self.road6[0] +name)
 
+    def getTileNumber(self):
+        return self.tileNumber
+    
     def validSettlementLocation(self, location, adjList):
             def locCheck():
                 if location == 1:
@@ -353,6 +356,143 @@ class Tile:
                 playerDict[self.spot6[1]] += 1
         return playerDict
         
-        
-            
+    def placeSettlementMin(self, location, playerClass, adjList, init=False):
+        player = playerClass.playerNum
 
+        def roadCheck():
+            firstCheck, secondCheck = True, True
+            if location == 1:
+                if adjList[0]:
+                    firstCheck = (adjList[0].spot2[1] == None) and (adjList[0].spot3[1] == None) and (adjList[0].spot4[1] == None)
+                if adjList[1]:
+                    secondCheck = (adjList[1].spot4[1] == None) and (adjList[1].spot5[1] == None) and (adjList[1].spot6[1] == None)
+            elif location == 2:
+                if adjList[0]:
+                    firstCheck = (adjList[0].spot3[1] == None) and (adjList[0].spot4[1] == None) and (adjList[0].spot5[1] == None)
+                if adjList[1]:
+                    secondCheck = (adjList[1].spot5[1] == None) and (adjList[1].spot6[1] == None) and (adjList[1].spot1[1] == None)
+            elif location == 3:
+                if adjList[0]:
+                    firstCheck = (adjList[0].spot4[1] == None) and (adjList[0].spot5[1] == None) and (adjList[0].spot6[1] == None)
+                if adjList[1]:
+                    secondCheck = (adjList[1].spot6[1] == None) and (adjList[1].spot1[1] == None) and (adjList[1].spot2[1] == None)
+            elif location == 4:
+                if adjList[0]:
+                    firstCheck = (adjList[0].spot5[1] == None) and (adjList[0].spot6[1] == None) and (adjList[0].spot1[1] == None)
+                if adjList[1]:
+                    secondCheck = (adjList[1].spot1[1] == None) and (adjList[1].spot2[1] == None) and (adjList[1].spot3[1] == None)
+            elif location == 5:
+                if adjList[0]:
+                    firstCheck = (adjList[0].spot6[1] == None) and (adjList[0].spot1[1] == None) and (adjList[0].spot2[1] == None)
+                if adjList[1]:
+                    secondCheck = (adjList[1].spot2[1] == None) and (adjList[1].spot3[1] == None) and (adjList[1].spot4[1] == None)
+            elif location == 6:
+                if adjList[0]:
+                    firstCheck = (adjList[0].spot1[1] == None) and (adjList[0].spot2[1] == None) and (adjList[0].spot3[1] == None)
+                if adjList[1]:
+                    secondCheck = (adjList[1].spot3[1] == None) and (adjList[1].spot4[1] == None) and (adjList[1].spot5[1] == None)
+            return firstCheck and secondCheck
+
+        boolcheck = self.validSettlementLocation(location, adjList) 
+        if init:
+            boolcheck = boolcheck and roadCheck()
+            
+        if boolcheck:
+            if location == 1:
+                self.spot1 = ("SETTLEMENT", player)
+                if adjList[0]:
+                    adjList[0].updateSettlement(3, player)
+                if adjList[1]:
+                    adjList[1].updateSettlement(5, player)
+            elif location == 2:
+                self.spot2 = ("SETTLEMENT", player)
+                if adjList[0]:
+                    adjList[0].updateSettlement(4, player)
+                if adjList[1]:
+                    adjList[1].updateSettlement(6, player)
+            elif location == 3:
+                self.spot3 = ("SETTLEMENT", player)
+                if adjList[0]:
+                    adjList[0].updateSettlement(5, player)
+                if adjList[1]:
+                    adjList[1].updateSettlement(1, player)
+            elif location == 4:
+                self.spot4 = ("SETTLEMENT", player)
+                if adjList[0]:
+                    adjList[0].updateSettlement(6, player)
+                if adjList[1]:
+                    adjList[1].updateSettlement(2, player)
+            elif location == 5:
+                self.spot5 = ("SETTLEMENT", player)
+                if adjList[0]:
+                    adjList[0].updateSettlement(1, player)
+                if adjList[1]:
+                    adjList[1].updateSettlement(3, player)
+            elif location == 6:
+                self.spot6 = ("SETTLEMENT", player)
+                if adjList[0]:
+                    adjList[0].updateSettlement(2, player)
+                if adjList[1]:
+                    adjList[1].updateSettlement(4, player)
+
+            if adjList[0] and not adjList[0].type == resourceType.DESERT:
+                playerClass.updateResLocCount(adjList[0].type)
+            if adjList[1] and not adjList[1].type == resourceType.DESERT:
+                playerClass.updateResLocCount(adjList[1].type)
+            
+            playerClass.updateResLocCount(self.type)
+            return self
+        return self
+    
+    def validSettlementLocationMin(self, location, adjList):
+            def locCheck():
+                if location == 1:
+                    return (self.spot6[1] == None) and (self.spot2[1] == None)
+                elif location == 2:
+                    return (self.spot1[1] == None) and (self.spot3[1] == None)
+                elif location == 3:
+                    return (self.spot2[1] == None) and (self.spot4[1] == None)
+                elif location == 4:
+                    return (self.spot3[1] == None) and (self.spot5[1] == None)
+                elif location == 5:
+                    return (self.spot4[1] == None) and (self.spot6[1] == None)
+                elif location == 6:
+                    return (self.spot5[1] == None) and (self.spot1[1] == None)
+                else:
+                    return False
+            
+            def neighborCheck():
+                firstCheck, secondCheck = True, True
+                if adjList:
+                    if location == 1:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot2[1] == None) and (adjList[0].spot3[1] == None) and (adjList[0].spot4[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot4[1] == None) and (adjList[1].spot5[1] == None) and (adjList[1].spot6[1] == None)
+                    elif location == 2:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot3[1] == None) and (adjList[0].spot4[1] == None) and (adjList[0].spot5[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot5[1] == None) and (adjList[1].spot6[1] == None) and (adjList[1].spot1[1] == None)
+                    elif location == 3:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot4[1] == None) and (adjList[0].spot5[1] == None) and (adjList[0].spot6[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot6[1] == None) and (adjList[1].spot1[1] == None) and (adjList[1].spot2[1] == None)
+                    elif location == 4:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot5[1] == None) and (adjList[0].spot6[1] == None) and (adjList[0].spot1[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot1[1] == None) and (adjList[1].spot2[1] == None) and (adjList[1].spot3[1] == None)
+                    elif location == 5:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot6[1] == None) and (adjList[0].spot1[1] == None) and (adjList[0].spot2[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot2[1] == None) and (adjList[1].spot3[1] == None) and (adjList[1].spot4[1] == None)
+                    elif location == 6:
+                        if adjList[0]:
+                            firstCheck = (adjList[0].spot1[1] == None) and (adjList[0].spot2[1] == None) and (adjList[0].spot3[1] == None)
+                        if adjList[1]:
+                            secondCheck = (adjList[1].spot3[1] == None) and (adjList[1].spot4[1] == None) and (adjList[1].spot5[1] == None)
+                return firstCheck and secondCheck
+            return locCheck() and neighborCheck()

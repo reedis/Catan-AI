@@ -171,10 +171,12 @@ class Game:
     ## gets the move that minimizes the next turn the most
     def executeDefensivePlay(self):
         nextPlayer = (self.currentPlayer+1) % self.playerCount
-        self.board.getMinMove(self.players[nextPlayer], self.getCurrentPlayer())
-    
+        minMove = self.board.getMinMove(self.players[nextPlayer], self.getCurrentPlayer())
+        print(minMove)
+
     def getMaxRoad(self, tile, loc):
         return self.board.getMaxRoad(tile, loc, self.getCurrentPlayer())
+    
 
     # TODO: 
     # trading with other players?:
@@ -189,6 +191,8 @@ class Game:
     #   find a way to evaulate road placements
     # defensive/offensive:
     #   ExpectiMax vs ExpectiMini
+
+'''
 def setUp():
     while(catan.inSetUp()):
         if catan.getCurrentPlayer().isAI:
@@ -276,15 +280,14 @@ while(not gameCheck):
         catan.rollDice() 
 
 
-'''
+'''    
 catan = Game(1)
+print(catan.executeDefensivePlay())
 catan.beginGame()
-print(catan.executeOffensivePlay())
-catan.beginGame()
-
+'''
 catan.beginGame()
 catan.resourceMap()
-catan.buildSettlement(13, 3)
+catan       .buildSettlement(13, 3)
 catan.buildRoad(13, 3)
 catan.rollDice(8)
 catan.rollDice(5)

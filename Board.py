@@ -289,8 +289,26 @@ class Board:
     # main func to find min next move
     def getMinMove(self, nextPlayer, currentPlayer):
         validSettlementLoc = self.getAllOpenSpots()
+        moveList = []
         for spot in validSettlementLoc:
             tempBoard = self.board.copy()
+            if not self.getTileMinMove(spot[0], tempBoard).type == resourceType.DESERT:
+                board = self.placeSettlementMinMove(spot[0], spot[1], currentPlayer, tempBoard)
+                maxMove = self.getMaxMoveMinMove(nextPlayer, board)
+                moveList.append((spot, maxMove))
+
+
+        minAction = None
+        minVal = float("inf")
+        for action, value in moveList:
+            print(value[0])
+            if float(value[0]) < minVal:
+                print(action)
+                print(value[0])
+                minAction = action
+                minVal = value[0]
+        return minAction
+
 
     def removeAdjLoc(self, spot, listOfSpots):
         listOfSpots = listOfSpots.remove(spot)
@@ -366,6 +384,8 @@ class Board:
                     ownedResSpots = player.resourceLocCount[t.type]
                     totalSpotsVal = self.totalSpots/(resSpotsLeft * (1 + ownedResSpots))
                     spotVal += t.getTileVal() * totalSpotsVal
+        
+        return spotVal / (4 - len(tilesList))
 
     def getAdjTilesMinMove(self, tileNum, loc, board):
         adjList = tileMapping[tileNum][loc - 1]
@@ -384,4 +404,42 @@ class Board:
                 if tileCounter == tileNumber:
                     return tile
                 else:
-                     tileCounter += 1
+                        tileCounter += 1
+
+    def placeSettlementMinMove(self, tileLoc, location, player, board):
+        tile = self.getTileMinMove(tileLoc, board)
+        adjTiles = self.getAdjTilesMinMove(tileLoc, location, board)
+        tile = tile.placeSettlementMin(location, player, adjTiles)
+        rowInt = 0
+        colInt = 0
+        for row in board:
+            for t in row:
+                if t.getTileNumber() == tileLoc:
+                    board[rowInt][colInt] = tile
+                colInt += 1
+            colInt = 0
+            rowInt += 1
+        return board
+    
+    def getAllSpotValuesMinMove(self, player, board):
+        spotDict = {}
+        copyBoard = board.copy()
+        for row in copyBoard:
+            for t in row:
+                for i in range(1,7):
+                    if not (t, i) in spotDict and self.validSettlementMinMove(t.tileNumber, i, board):
+                        spotDict[(t.tileNumber, i)] = float(self.getSpotValueMinMove(t, i, player, board))
+                    
+        return spotDict
+
+    def validSettlementMinMove(self, tile, loc, board):
+        return self.getTileMinMove(tile, board).validSettlementLocationMin(loc, self.getAdjTilesMinMove(tile, loc, board))
+    
+    def getMaxMoveMinMove(self, player, board):
+        dictVals = self.getAllSpotValuesMinMove(player, board)
+        maxMoves = []
+        maxVal = max(list(dictVals.values()))
+        for key,value in dictVals.items():
+            if value >= maxVal:
+                maxMoves.append(value)
+        return maxMoves
