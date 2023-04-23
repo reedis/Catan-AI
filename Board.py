@@ -157,25 +157,6 @@ class Board:
         return placed
     
     def getAdjTiles(self, tileNum, loc):
-        tileMapping = {1: ((-1, -1), (-1, 2), (2, 5), (4, 5), (-1, 4), (-1, -1)),
-                       2: ((-1, -1), (-1, 3), (6, 3), (5, 6), (1, 5), (-1, 1)), 
-                       3: ((-1, -1), (-1, -1), (-1, 7), (7, 6), (6, 2), (-1, 2)), 
-                       4: ((-1, 1), (1, 5), (5, 9), (9, 8), (8, -1), (-1, -1)), 
-                       5: ((1, 2), (2, 6), (6, 10), (10, 9), (9, 4), (4, 1)), 
-                       6: ((2, 3), (3, 7), (7, 11), (11, 10), (10, 5), (5, 2)), 
-                       7: ((-1, 3), (-1, -1), (-1, 12), (12, 11), (11, 6), (6, 3)), 
-                       8: ((-1, 4), (4, 9), (9, 13), (-1, 13), (-1, -1), (-1, -1)), 
-                       9: ((4, 5), (5, 10), (10, 14), (14, 13), (13, 8), (8, 4)), 
-                       10: ((5, 6), (6, 11), (11, 15), (15, 14), (14, 9), (9, 5)), 
-                       11: ((6, 7), (7, 12), (12, 16), (16, 15), (15, 10), (10, 6)), 
-                       12: ((-1, 7), (-1, -1), (-1, -1), (-1, 16), (16, 11), (11, 7)), 
-                       13: ((8, 9), (9, 14), (14, 17), (-1, 17), (-1, -1), (-1, 8)), 
-                       14: ((9, 10), (10, 15), (15, 18), (18, 17), (17, 13), (13, 9)), 
-                       15: ((10, 11), (11, 16), (16, 19), (19, 18), (18, 14), (14, 10)), 
-                       16: ((11, 12), (-1, 12), (-1, -1), (-1, 19), (19, 15), (15, 11)), 
-                       17: ((13, 14), (14, 18), (-1, 18), (-1, -1), (-1, -1), (-1, 13)), 
-                       18: ((14, 15), (15, 19), (-1, 19), (-1, -1), (-1, 17), (17, 14)), 
-                       19: ((15, 16), (-1, 16), (-1, -1), (-1, -1), (-1, 18), (18, 15))}
         adjList = tileMapping[tileNum][loc - 1]
         tileList = []
         for index in adjList:
@@ -244,8 +225,6 @@ class Board:
 
         return spotDict
     
-    
-
     def getValidMoves(self, player, moves):
         def consecutiveRoads(roadList):
             roadDict = {}
@@ -298,10 +277,6 @@ class Board:
                     moves[moves.index(actions.ROAD)] = (actions.ROAD, locationList)
             return moves
 
-    # Place a settlement on a temp board to find min of next turn
-    def tempSettlement(self, tile, loc, player):
-        ...
-
     def getMaxMove(self, player):
         dictVals = self.getAllSpotValues(player)
         maxMoves = []
@@ -313,9 +288,31 @@ class Board:
 
     # main func to find min next move
     def getMinMove(self, nextPlayer, currentPlayer):
-        tempBoard = self.board.copy()
-        ...
+        validSettlementLoc = self.getAllOpenSpots()
+        for spot in validSettlementLoc:
+            tempBoard = self.board.copy()
+
+    def removeAdjLoc(self, spot, listOfSpots):
+        listOfSpots = listOfSpots.remove(spot)
+        tn = spot[0]
+        loc = spot[1]
+        adjTiles = tileMapping[tn][loc]
+        retList = []
+        for adjSpot in listOfSpots:
+            if adjSpot[0] in adjTiles:
+                ...
+
+    def distBetweenSpots(self, s1, s2, count):
+        nSpots = tileMapping[s1]
+        countList = []
+        for v in nSpots.values():
+            if v == s2:
+                return count
+            else:
+                countList.append(self.distBetweenSpots(v, s2, count+1))
         
+        return min(countList)
+
     def getMaxRoad(self, tileNum, loc, player):
         ## recursion depth is based on how many roads left
         recDepth = min(player.roads, 5)
@@ -346,10 +343,45 @@ class Board:
                     return key
                 else:
                     return value
+                
+    def getAllOpenSpots(self):
+        spotList = []
+        for i in range(1, 20):
+            for j in range(1, 7):
+                if self.validSettlement(i, j):
+                    spotList.append((i, j))
 
-
-
-    def getRoadOptions(tile, adj):
-        ...
-
+        return spotList
     
+    def getSpotValueMinMove(self, tile, pos, player, board):
+        tilesList = self.getAdjTilesMinMove(tile.tileNumber, pos, board)
+        initTile = self.getTileMinMove(tile.tileNumber, board)
+        tilesList.append(initTile)
+        tempAdjList = tilesList.copy()
+        spotVal = 0 
+        for t in tilesList:
+            if t:
+                if not t.type == resourceType.DESERT:
+                    resSpotsLeft = self.getResSpots(t.type, tempAdjList.remove(t))
+                    ownedResSpots = player.resourceLocCount[t.type]
+                    totalSpotsVal = self.totalSpots/(resSpotsLeft * (1 + ownedResSpots))
+                    spotVal += t.getTileVal() * totalSpotsVal
+
+    def getAdjTilesMinMove(self, tileNum, loc, board):
+        adjList = tileMapping[tileNum][loc - 1]
+        tileList = []
+        for index in adjList:
+            if index == -1:
+                tileList.append(None)
+            else:
+                tileList.append(self.getTileMinMove(index, board))
+        return tileList
+    
+    def getTileMinMove(self, tileNumber, board):
+        tileCounter = 1
+        for row in board:
+            for tile in row:
+                if tileCounter == tileNumber:
+                    return tile
+                else:
+                     tileCounter += 1
