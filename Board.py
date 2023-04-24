@@ -147,6 +147,7 @@ class Board:
         placed = tile.placeSettlement(location, player, adjTiles, init)
         if placed:
             self.totalSpots -= 1
+
         return placed
     
     def placeRoad(self, tileLoc, location, player, setUp):
@@ -296,15 +297,12 @@ class Board:
                 board = self.placeSettlementMinMove(spot[0], spot[1], currentPlayer, tempBoard)
                 maxMove = self.getMaxMoveMinMove(nextPlayer, board)
                 moveList.append((spot, maxMove))
-
+                self.printBoard()
 
         minAction = None
         minVal = float("inf")
         for action, value in moveList:
-            print(value[0])
             if float(value[0]) < minVal:
-                print(action)
-                print(value[0])
                 minAction = action
                 minVal = value[0]
         return minAction
@@ -333,7 +331,7 @@ class Board:
 
     def getMaxRoad(self, tileNum, loc, player):
         ## recursion depth is based on how many roads left
-        recDepth = min(player.roads, 5)
+        recDepth = min(player.roads, 6)
         initialOptions = tileRoadMapping[(tileNum, loc)]
         return self.recRoadFinder(initialOptions, 0, recDepth, player, 0)
 
@@ -341,8 +339,7 @@ class Board:
         returnMap = {}
         if rec == 0:
             return acc
-        
-
+    
         rec -= 1
         for key, value in initMaping.items():
 
@@ -352,7 +349,6 @@ class Board:
             returnMap[value] = acc
             acc = 0
  
-
         maxDictVal = max(list(returnMap.values()))
 
         for key, value in returnMap.items():
@@ -370,6 +366,23 @@ class Board:
                     spotList.append((i, j))
 
         return spotList
+    
+    def getOpenRoadPos(self, roadList, settlementList, player):
+        adjSettlementList = []
+        adjRoadList = []
+        for tn, loc in settlementList:
+            adjSettlementList.append(tileMapping[tn][loc])
+
+        for tn, loc in roadList:
+            for key, value in tileMapping.items():
+                if (tn, loc) in value:
+                    adjRoadList.append(key)
+
+        defensive = self.recRoadFinder(adjSettlementList, 0, min(player.roads, 6), player, 0)
+        offensive = self.recRoadFinder(adjRoadList, 0, min(player.roads, 6), player, 0)
+
+        return (offensive, defensive)
+
     
     def getSpotValueMinMove(self, tile, pos, player, board):
         tilesList = self.getAdjTilesMinMove(tile.tileNumber, pos, board)
@@ -419,6 +432,7 @@ class Board:
                 colInt += 1
             colInt = 0
             rowInt += 1
+
         return board
     
     def getAllSpotValuesMinMove(self, player, board):
@@ -443,3 +457,14 @@ class Board:
             if value >= maxVal:
                 maxMoves.append(value)
         return maxMoves
+    
+    def getAllSpotValuesMin(self, player, board):
+        spotDict = {}
+        for row in board:
+            for t in row:
+                for i in range(1,7):
+                    if not (t, i) in spotDict and self.validSettlementMinMove(t.tileNumber, i, board):
+                        spotDict[(t.tileNumber,i)] = float(self.getSpotValueMinMove(t, i, player, board))
+
+        return spotDict
+    

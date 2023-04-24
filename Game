@@ -23,6 +23,10 @@ class Game:
     def getCurrentPlayer(self):
         return self.players[self.currentPlayer]
     
+    def getNextPlayer(self):
+        nextPlayer = (self.currentPlayer+1) % self.playerCount
+        return self.players[nextPlayer]
+    
     def endTurn(self):
         self.getCurrentPlayer().endTurn()
         self.currentPlayer = (self.currentPlayer+1) % self.playerCount
@@ -34,7 +38,7 @@ class Game:
         
     def buildSettlement(self, tileNumber, location):
         if self.getCurrentPlayer().buildSettlement(tileNumber, location) or self.inSetUp():
-            if self.board.placeSettlement(tileNumber, location, self.getCurrentPlayer(), self.inSetUp):
+            if self.board.placeSettlement(tileNumber, location, self.getCurrentPlayer(), self.inSetUp()):
                 print("settlement placed at tile %d, location %d, by player %d" % (tileNumber, location, self.currentPlayer))
             else:
                 print("issue placing settlement please try again")
@@ -67,6 +71,7 @@ class Game:
                     break
             
             self.players[self.playerCount].addDevCard(res)
+            print("You bought a %s" % res)
             input("Please press any key to continue")
         else:
             input("Sorry all dev cards have been bought, \nplease press any key to continue")
@@ -91,7 +96,7 @@ class Game:
         roll = (random.choice(dice) + random.choice(dice)) if (input == -1) else input
         print("You Rolled a " + str(roll)) 
         if roll == 7:
-            self.seven()
+            return
         else:
             self.updateRes(roll)
 
@@ -117,9 +122,6 @@ class Game:
             player.printPlayerStats()
             player.printPlayerResources()
 
-    def seven(self):
-        print("")
-
     def getActions(self):
         actionList = self.getCurrentPlayer().getMoves()
         actionList = self.board.getValidMoves(self.getCurrentPlayer(), actionList)
@@ -129,8 +131,8 @@ class Game:
         for player in self.players:
             if player.vp >= 10:
                 print("Player%d has won!" % player.playerNum)
-                return False
-        return True
+                return True
+        return False
     
     def playTurn(self, type):
         if type == 1:
@@ -166,17 +168,51 @@ class Game:
         self.buildSettlement(maxSettlement[0], maxSettlement[1])
         maxRoad = self.board.getMaxRoad(maxSettlement[0], maxSettlement[1], player)
         self.buildRoad(maxRoad[0], maxRoad[1])
-        return maxSettlement, maxRoad
+        return maxSettlement
     
     ## gets the move that minimizes the next turn the most
     def executeDefensivePlay(self):
-        nextPlayer = (self.currentPlayer+1) % self.playerCount
-        minMove = self.board.getMinMove(self.players[nextPlayer], self.getCurrentPlayer())
-        print(minMove)
+        minMove = self.board.getMinMove(self.getNextPlayer(), self.getCurrentPlayer())
+        self.buildSettlement(minMove[0], minMove[1])
+        maxRoad = self.board.getMaxRoad(minMove[0], minMove[1], self.getCurrentPlayer())
+        self.buildRoad(maxRoad[0], maxRoad[1])
+        return minMove, maxRoad[1]
+
+    def getAIRoad(self, aiType):
+        settlementList = self.getCurrentPlayer().settlementLoc
+        roadList = self.getCurrentPlayer().roadLoc
+        choice = self.board.getOpenRoadPos(settlementList, roadList)[aiType-1]
+        print(choice)
+        self.buildRoad(choice[0], choice[1])
+        return
 
     def getMaxRoad(self, tile, loc):
         return self.board.getMaxRoad(tile, loc, self.getCurrentPlayer())
     
+    def aiActions(self, aiType):
+        actionsList = self.getActions()
+        if None == actionsList:
+            return
+        if actions.ROLL in actionsList:
+            self.rollDice()
+            self.aiActions(aiType)
+        elif actions.SETTLEMENT in actionsList:
+            if aiType == 1:
+                maxMove = self.board.getMaxMove(self.getCurrentPlayer())
+                self.buildSettlement(maxMove[0], maxMove[1])
+            else:
+                minMove = self.board.getMinMove(self.getNextPlayer(), self.getCurrentPlayer())
+                self.buildSettlement(minMove[0], minMove[1])
+            self.aiActions(aiType)
+        elif actions.ROAD in actionsList:
+            self.getAIRoad(aiType)
+        elif actions.BUYDEVCARD in actionsList:
+            self.buyDevCard()
+            self.aiActions(aiType)
+        elif actions.USEDEVCARD in actionsList:
+            self.aiActions(aiType)
+        else:
+            return
 
     # TODO: 
     # trading with other players?:
@@ -192,11 +228,11 @@ class Game:
     # defensive/offensive:
     #   ExpectiMax vs ExpectiMini
 
-'''
-def setUp():
+gameCheck = False
+def setUp(aiType):
     while(catan.inSetUp()):
         if catan.getCurrentPlayer().isAI:
-            catan.playTurn(1)
+            catan.playTurn(aiType)
             catan.endTurn()
         else:
             option = input("Will player %d please place their first settlement type M to see the resource map again, \ntype A to see the array again, or press anything else to build " % catan.currentPlayer).lower().strip()
@@ -237,7 +273,7 @@ def setUp():
                 catan.buildSettlement(tileNum, pos)   
             else:
                 print("Lets begin again")
-                setUp()
+                setUp(aiType)
             
             validRoad = False
             while(not validRoad):
@@ -254,8 +290,74 @@ def setUp():
     input("Set up is completed, please press enter to continue")
     os.system('clear')
 
+def playerActions():
+    actionList = catan.getActions()
+    print("These are your available actions: ")
+    print(actionList)
+    print("Note the action you choose has to be in the list above")
+    if actionList == None:
+        input("You have no actions available, press enter to end turn")
+        return
+    answer = input("Type s to build a settlement, type r to build a road, type t to trade, type d to buy a dev card, type u to use a dev card").lower().strip()
+    if answer == 's': 
+        playerSettlement()
+    elif answer == 'r': 
+        playerRoad()
+    elif answer == 't': 
+        catan.trade()
+    elif answer == 'd': 
+        catan.buyDevCard()
+    elif answer == 'u': 
+        playerDevCard()
+    else: 
+        input("Invalid option: %s, press enter to try again" % answer)
+        playerActions()
+    return
 
-gameCheck = False
+def playerSettlement():
+    tile = int(input("Enter the tile you want to build a settlement on: ").lower().strip())
+    loc = int(input("Enter the location on the tile for the settlement: ").lower().strip())
+    tf = catan.buildSettlement(tile, loc)
+    if tf:
+        playerActions()
+    else:
+        again = int(input("Invalid location given, try again (1) or return to action menu (2): ").lower().strip())
+        if again == 1:
+            playerSettlement()
+        else:
+            playerActions()
+
+def playerRoad():
+    tile = int(input("Enter the tile you want to build a road on: ").lower().strip())
+    loc = int(input("Enter the location on the tile for the road: ").lower().strip())
+    tf = catan.buildRoad(tile, loc)
+    if tf:
+        playerActions()
+    else:
+        again = int(input("Invalid location given, try again (1) or return to action menu (2): ").lower().strip())
+        if again == 1:
+            playerRoad()
+        else:
+            playerActions()
+
+def playerDevCard():
+    catan.useDevCard()
+
+def playGame():
+    setUp(aiType)
+    while(not gameCheck):
+        input("It is currently player %d's turn, please press any key to continue" % catan.currentPlayer)
+        if catan.getCurrentPlayer().isAI:
+            catan.aiActions(aiType)
+            catan.endTurn()
+        else:
+            actionList = catan.getActions()
+            if len(actionList) == 1:
+                input("Please press enter to roll, you have no dev cards to use")
+                catan.rollDice() 
+            playerActions()
+            catan.endTurn()
+        gameCheck = catan.gameOver()
 
 print("Welcome to the 2 player Game Catan AI, player 0 is human, player 1 is the AI")
 input("Please press enter to continue")
@@ -263,28 +365,18 @@ input("Please press enter to continue")
 rand = input("Do you want a random board? Y/N ").lower().strip()
 rand = (rand == 'y')
 catan = Game(2, rand, 2)
+aiType = int(input("Do you want the AI to play offensively (1) or defensively (2)?").lower().strip())
 catan.resourceMap()
 catan.beginGame()
-setUp()
+playGame()
     
-
-
-
-while(not gameCheck):
-    input("It is currently player %d's turn, please press any key to continue" % catan.currentPlayer)
-    actionList = catan.getActions()
-    if not len(actionList) == 1:
-        ...
-    else:
-        input("Please press enter to roll, you have no dev cards to use")
-        catan.rollDice() 
 
 
 '''    
 catan = Game(1)
 print(catan.executeDefensivePlay())
 catan.beginGame()
-'''
+
 catan.beginGame()
 catan.resourceMap()
 catan       .buildSettlement(13, 3)

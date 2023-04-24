@@ -164,7 +164,7 @@ class Tile:
                     secondCheck = (adjList[1].spot3[1] == None) and (adjList[1].spot4[1] == None) and (adjList[1].spot5[1] == None)
             return firstCheck and secondCheck
 
-        boolcheck = self.validSettlementLocation(location, adjList) 
+        boolcheck = self.validSettlementLocation(location, adjList)
         if init:
             boolcheck = boolcheck and roadCheck()
             
@@ -300,28 +300,34 @@ class Tile:
             play.roadLoc.append((tn, location))
             if location == 1:
                 self.road1 = ("ROAD", player)
-                adj.updateRoad(4, player)
-                play.roadLoc.append((adj.tileNumber, 4))
+                if adj:
+                    adj.updateRoad(4, player)
+                    play.roadLoc.append((adj.tileNumber, 4))
             elif location == 2:
                 self.road2 = ("ROAD", player)
-                adj.updateRoad(5, player)
-                play.roadLoc.append((adj.tileNumber, 5))
+                if adj:
+                    adj.updateRoad(5, player)
+                    play.roadLoc.append((adj.tileNumber, 5))
             elif location == 3:
                 self.road3 = ("ROAD", player)
-                adj.updateRoad(6, player)
-                play.roadLoc.append((adj.tileNumber, 6))
+                if adj:
+                    adj.updateRoad(6, player)
+                    play.roadLoc.append((adj.tileNumber, 6))
             elif location == 4:
                 self.road4 = ("ROAD", player)
-                adj.updateRoad(1, player)
-                play.roadLoc.append((adj.tileNumber, 1))
+                if adj:
+                    adj.updateRoad(1, player)
+                    play.roadLoc.append((adj.tileNumber, 1))
             elif location == 5:
                 self.road5 = ("ROAD", player)
-                adj.updateRoad(2, player)
-                play.roadLoc.append(2)
+                if adj:
+                    adj.updateRoad(2, player)
+                    play.roadLoc.append(2)
             elif location == 6:
                 self.road6 = ("ROAD", player)
-                adj.updateRoad(3, player)
-                play.roadLoc.append((adj.tileNumber, 3))
+                if adj:
+                    adj.updateRoad(3, player)
+                    play.roadLoc.append((adj.tileNumber, 3))
             return True
         else:
             return False
@@ -393,7 +399,7 @@ class Tile:
                     secondCheck = (adjList[1].spot3[1] == None) and (adjList[1].spot4[1] == None) and (adjList[1].spot5[1] == None)
             return firstCheck and secondCheck
 
-        boolcheck = self.validSettlementLocation(location, adjList) 
+        boolcheck = self.validSettlementLocationMin(location, adjList) 
         if init:
             boolcheck = boolcheck and roadCheck()
             
